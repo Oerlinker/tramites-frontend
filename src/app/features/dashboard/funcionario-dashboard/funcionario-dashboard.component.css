@@ -1,0 +1,30 @@
+.dashboard { padding: 2rem; }
+h1 { color: #1a237e; margin-bottom: 1.5rem; }
+
+.stats-row { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+.stat-card { background: #fff; border-radius: 8px; padding: 1.5rem 2rem; box-shadow: 0 1px 6px rgba(0,0,0,0.1); border-left: 4px solid #3949ab; display: flex; flex-direction: column; gap: 0.5rem; min-width: 180px; }
+.stat-card.border-red  { border-left-color: #ef4444; }
+.stat-card.border-blue { border-left-color: #3b82f6; }
+.stat-label { font-size: 0.78rem; color: #757575; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 500; }
+.stat-value { font-size: 2rem; font-weight: 700; color: #212121; }
+
+.section { background: #fff; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 6px rgba(0,0,0,0.1); }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.section-header h3 { margin: 0; color: #424242; }
+.section-header a { color: #1a237e; font-size: 0.875rem; text-decoration: none; }
+.section-header a:hover { text-decoration: underline; }
+
+.act-list { display: flex; flex-direction: column; gap: 8px; }
+.act-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 6px; background: #f9f9f9; border: 1px solid #f0f0f0; }
+.act-info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.act-nombre { font-size: 0.9rem; font-weight: 500; color: #212121; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.act-tramite { font-size: 0.78rem; color: #888; }
+
+.badge { padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+.badge-pendiente { background: #fff3e0; color: #e65100; }
+.badge-enproceso  { background: #e3f2fd; color: #1565c0; }
+
+.btn-ver { flex-shrink: 0; padding: 4px 12px; background: #e8eaf6; color: #1a237e; border-radius: 4px; font-size: 0.8rem; font-weight: 500; text-decoration: none; }
+.btn-ver:hover { background: #c5cae9; }
+
+.empty { color: #9e9e9e; font-size: 0.9rem; }

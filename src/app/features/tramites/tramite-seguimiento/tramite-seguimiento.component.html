@@ -1,0 +1,65 @@
+<div class="page">
+  <div class="page-header">
+    <h1>{{ auth.getUserRole() === 'CLIENTE' ? 'Mis Trámites' : 'Gestión de Trámites' }}</h1>
+    @if (auth.getUserRole() === 'CLIENTE') {
+      <a routerLink="/tramites/iniciar" class="btn-primary">+ Nuevo Trámite</a>
+    }
+  </div>
+
+  <div class="filters">
+    <select [(ngModel)]="filtroEstado" (change)="load()" name="estado">
+      <option value="">Todos los estados</option>
+      @for (e of estados; track e) {
+        <option [value]="e">{{ e }}</option>
+      }
+    </select>
+  </div>
+
+  @if (error()) { <p class="error-msg">{{ error() }}</p> }
+
+  @if (loading()) {
+    <p>Cargando...</p>
+  } @else if (tramites().length === 0) {
+    <p class="empty">No hay trámites.</p>
+  } @else {
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th><th>Título</th><th>Solicitante</th><th>Estado</th><th>Fecha</th>
+          @if (auth.getUserRole() !== 'CLIENTE') { <th>Acción</th> }
+        </tr>
+      </thead>
+      <tbody>
+        @for (t of tramites(); track t.id) {
+          <tr>
+            <td>#{{ t.id }}</td>
+            <td>{{ t.titulo }}</td>
+            <td>{{ t.usuarioSolicitanteId }}</td>
+            <td><span class="badge badge-{{ t.estado.toLowerCase() }}">{{ t.estado }}</span></td>
+            <td>{{ t.fechaInicio | slice:0:10 }}</td>
+            @if (auth.getUserRole() !== 'CLIENTE') {
+              <td>
+                <select class="select-estado" [value]="t.estado" (change)="cambiarEstado(t.id, $any($event.target).value)">
+                  @for (e of estados; track e) {
+                    <option [value]="e">{{ e }}</option>
+                  }
+                </select>
+                @if (auth.getUserRole() === 'ADMIN' &&
+                     (t.estado === 'CANCELADO' || t.estado === 'COMPLETADO')) {
+                  <button class="btn-eliminar-tramite" (click)="eliminarTramite(t.id)">
+                    🗑 Eliminar
+                  </button>
+                }
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+    <div class="pagination">
+      <button (click)="prevPage()" [disabled]="currentPage() === 0">‹ Anterior</button>
+      <span>Página {{ currentPage() + 1 }} / {{ totalPages() }}</span>
+      <button (click)="nextPage()" [disabled]="currentPage() >= totalPages() - 1">Siguiente ›</button>
+    </div>
+  }
+</div>

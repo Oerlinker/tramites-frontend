@@ -1,0 +1,31 @@
+<div class="dashboard">
+  <h1>Panel Cliente</h1>
+  <div class="action-bar">
+    <a routerLink="/tramites/iniciar" class="btn-primary">+ Iniciar nuevo trámite</a>
+  </div>
+  <div class="section">
+    <h3>Mis Trámites Recientes</h3>
+    @if (loading()) {
+      <p>Cargando...</p>
+    } @else if (misTramites().length === 0) {
+      <p class="empty">No has iniciado ningún trámite aún.</p>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr><th>ID</th><th>Tipo</th><th>Estado</th><th>Fecha</th></tr>
+        </thead>
+        <tbody>
+          @for (t of misTramites(); track t.id) {
+            <tr>
+              <td>#{{ t.id }}</td>
+              <td>{{ t.titulo }}</td>
+              <td><span class="badge badge-{{ t.estado.toLowerCase() }}">{{ t.estado }}</span></td>
+              <td>{{ t.fechaInicio | slice:0:10 }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <a routerLink="/tramites" class="ver-mas">Ver todos mis trámites →</a>
+    }
+  </div>
+</div>

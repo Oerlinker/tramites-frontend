@@ -1,0 +1,99 @@
+<div class="analitica-page">
+  <div class="page-header">
+    <h1>📊 Analítica y Cuellos de Botella</h1>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-wrap">
+      <div class="spinner"></div>
+      <p>Cargando datos...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-card">{{ error() }}</div>
+  } @else if (data(); as d) {
+
+    <!-- FILA 1: KPIs -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <span class="kpi-label">Total Trámites</span>
+        <span class="kpi-value">{{ d.totalTramites }}</span>
+      </div>
+      <div class="kpi-card accent-blue">
+        <span class="kpi-label">Últimos 7 días</span>
+        <span class="kpi-value">{{ d.tramitesUltimos7Dias }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Total Actividades</span>
+        <span class="kpi-value">{{ d.totalActividades }}</span>
+      </div>
+      <div class="kpi-card accent-green">
+        <span class="kpi-label">Duración Promedio</span>
+        <span class="kpi-value">{{ d.duracionPromedioHoras | number:'1.1-1' }} <small>horas</small></span>
+      </div>
+    </div>
+
+    <!-- FILA 2: Estados -->
+    <div class="charts-row">
+
+      <div class="chart-card">
+        <h2>Trámites por Estado</h2>
+        <div class="bar-list">
+          @for (entry of entries(d.tramitesPorEstado); track entry[0]) {
+            <div class="bar-row">
+              <span class="bar-label">{{ entry[0] }}</span>
+              <div class="bar-track">
+                <div class="bar-fill"
+                     [style.width.%]="barWidth(entry[1], maxValue(d.tramitesPorEstado))"
+                     [style.background]="estadoColores[entry[0]] ?? '#9ca3af'">
+                </div>
+              </div>
+              <span class="bar-count">{{ entry[1] }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h2>Actividades por Estado</h2>
+        <div class="bar-list">
+          @for (entry of entries(d.actividadesPorEstado); track entry[0]) {
+            <div class="bar-row">
+              <span class="bar-label">{{ entry[0] }}</span>
+              <div class="bar-track">
+                <div class="bar-fill"
+                     [style.width.%]="barWidth(entry[1], maxValue(d.actividadesPorEstado))"
+                     [style.background]="estadoColores[entry[0]] ?? '#9ca3af'">
+                </div>
+              </div>
+              <span class="bar-count">{{ entry[1] }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FILA 3: Departamentos (cuellos de botella) -->
+    <div class="chart-card chart-wide">
+      <h2>🚧 Actividades por Departamento <span class="subtitle">— mayor carga = posible cuello de botella</span></h2>
+      <div class="bar-list">
+        @for (entry of departamentosCuello(d.actividadesPorDepartamento); track entry[0]; let i = $index) {
+          <div class="bar-row">
+            <span class="bar-label depto-label">
+              @if (i === 0) { <span class="badge-top">⚠ Mayor carga</span> }
+              {{ entry[0] }}
+            </span>
+            <div class="bar-track">
+              <div class="bar-fill depto-fill"
+                   [style.width.%]="barWidth(entry[1], maxValue(d.actividadesPorDepartamento))"
+                   [class.top-bar]="i === 0">
+              </div>
+            </div>
+            <span class="bar-count">{{ entry[1] }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+  }
+</div>

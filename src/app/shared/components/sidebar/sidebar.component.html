@@ -1,0 +1,25 @@
+<aside class="sidebar">
+  <nav class="sidebar-nav">
+    <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+      Dashboard
+    </a>
+
+    @if (auth.getUserRole() === 'ADMIN') {
+      <a routerLink="/politicas" routerLinkActive="active">Políticas</a>
+      <a routerLink="/monitor" routerLinkActive="active">Monitor</a>
+      <a routerLink="/tramites" routerLinkActive="active">Trámites</a>
+      <a routerLink="/departamentos" routerLinkActive="active">Departamentos</a>
+      <a routerLink="/usuarios" routerLinkActive="active">Usuarios</a>
+      <a routerLink="/analitica" routerLinkActive="active">Analítica</a>
+    }
+
+    @if (auth.getUserRole() === 'FUNCIONARIO') {
+      <a routerLink="/monitor" routerLinkActive="active">Mis Actividades</a>
+    }
+
+    @if (auth.getUserRole() === 'CLIENTE') {
+      <a routerLink="/tramites/iniciar" routerLinkActive="active">Iniciar Trámite</a>
+      <a routerLink="/tramites" routerLinkActive="active">Mis Trámites</a>
+    }
+  </nav>
+</aside>

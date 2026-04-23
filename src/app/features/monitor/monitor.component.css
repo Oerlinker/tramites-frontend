@@ -1,0 +1,107 @@
+.page { padding: 24px; }
+.page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.page-header h1 { color:#1a237e; font-size:1.6rem; margin:0; }
+.ws-status { display:flex; align-items:center; gap:6px; font-size:0.85rem; color:#666; }
+.dot { width:8px; height:8px; border-radius:50%; background:#ccc; }
+.dot.online { background:#4caf50; }
+
+.cards-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:16px; }
+
+.actividad-card { background:#fff; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); cursor:pointer; transition:transform 0.15s, box-shadow 0.15s; overflow:hidden; border-left:4px solid #ccc; }
+.actividad-card:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+.card-pendiente { border-left-color:#f44336; }
+.card-en_proceso { border-left-color:#ff9800; }
+.card-completado { border-left-color:#4caf50; }
+.card-omitido { border-left-color:#9e9e9e; }
+
+.card-header { display:flex; justify-content:space-between; align-items:flex-start; padding:12px 14px 6px; }
+.card-nombre { font-weight:600; font-size:0.95rem; color:#1a237e; flex:1; }
+.card-body { padding:0 14px 8px; }
+.card-tramite { font-size:0.8rem; color:#888; margin:2px 0; }
+.card-depto { font-size:0.82rem; color:#555; margin:2px 0; }
+.card-form-hint { font-size:0.8rem; color:#7b1fa2; margin:4px 0; }
+.card-footer { padding:8px 14px 12px; }
+
+.badge { padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:600; white-space:nowrap; }
+.badge-pendiente { background:#ffebee; color:#c62828; }
+.badge-proceso { background:#fff3e0; color:#e65100; }
+.badge-completado { background:#e8f5e9; color:#2e7d32; }
+.badge-omitido { background:#f5f5f5; color:#757575; }
+.badge-default { background:#e3f2fd; color:#1565c0; }
+
+.btn-atender { width:100%; padding:6px; background:#1a237e; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:0.85rem; }
+.btn-atender:disabled { background:#e0e0e0; color:#9e9e9e; cursor:default; }
+
+.empty-state { text-align:center; padding:60px; color:#888; font-size:1.1rem; }
+.loading-msg { padding:40px; text-align:center; color:#888; }
+.alert-error { background:#ffebee; color:#c62828; padding:10px 14px; border-radius:6px; margin-bottom:12px; font-size:0.85rem; }
+
+/* MODAL */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); display:flex; align-items:center; justify-content:center; z-index:1000; padding:16px; }
+.modal-atender { background:#fff; border-radius:12px; width:100%; max-width:560px; max-height:90vh; overflow-y:auto; display:flex; flex-direction:column; }
+.modal-header { display:flex; justify-content:space-between; align-items:center; padding:20px 24px 12px; border-bottom:1px solid #eee; }
+.modal-header h2 { margin:0; color:#1a237e; font-size:1.2rem; }
+.btn-close { background:none; border:none; font-size:1.3rem; cursor:pointer; color:#666; }
+.modal-meta { display:flex; gap:10px; align-items:center; padding:10px 24px; flex-wrap:wrap; }
+.meta-depto { font-size:0.85rem; color:#555; }
+.meta-tramite { font-size:0.8rem; color:#888; }
+.modal-desc { padding:0 24px 8px; font-size:0.9rem; color:#555; }
+
+.formulario-section { margin:0 24px 16px; background:#f5f7ff; border:1px solid #c5cae9; border-radius:8px; padding:16px; }
+.formulario-section h3 { margin:0 0 14px; color:#1a237e; font-size:1rem; }
+.sin-formulario { margin:0 24px 16px; padding:16px; background:#f9f9f9; border-radius:8px; color:#888; text-align:center; }
+
+.form-group { margin-bottom:12px; }
+.form-group label { display:block; font-size:0.85rem; color:#555; margin-bottom:4px; font-weight:500; }
+.form-group input, .form-group select, .form-group textarea { width:100%; padding:8px 10px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem; box-sizing:border-box; }
+.valor-readonly { padding:8px 10px; background:#f5f5f5; border:1px solid #e0e0e0; border-radius:6px; font-size:0.9rem; color:#333; min-height:36px; }
+.req { color:#c62828; margin-left:3px; }
+.check-label { display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.9rem; }
+
+.modal-actions { display:flex; justify-content:flex-end; gap:10px; padding:16px 24px; border-top:1px solid #eee; }
+.btn-secondary { background:#e0e0e0; color:#333; border:none; padding:8px 18px; border-radius:6px; cursor:pointer; }
+.btn-iniciar { background:#ff9800; color:#fff; border:none; padding:8px 18px; border-radius:6px; cursor:pointer; font-weight:500; }
+.btn-completar { background:#1a237e; color:#fff; border:none; padding:8px 18px; border-radius:6px; cursor:pointer; font-weight:500; }
+
+.datos-cliente-section { margin:0 24px 16px; background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px; padding:16px; }
+.datos-cliente-section h3 { margin:0 0 12px; color:#2e7d32; font-size:0.95rem; }
+.datos-cliente-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.dato-item { display:flex; flex-direction:column; gap:2px; }
+.dato-label { font-size:0.75rem; color:#555; font-weight:600; text-transform:uppercase; }
+.dato-valor { font-size:0.9rem; color:#1a1a1a; background:#fff; padding:5px 8px; border-radius:4px; border:1px solid #c8e6c9; }
+
+.tramites-list { display:flex; flex-direction:column; gap:12px; }
+
+.tramite-folder { background:#fff; border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08); overflow:hidden;
+  border-left:5px solid #ccc; }
+.folder-pendiente { border-left-color:#f44336; }
+.folder-proceso { border-left-color:#ff9800; }
+.folder-completado { border-left-color:#4caf50; }
+
+.folder-header { display:flex; justify-content:space-between;
+  align-items:center; padding:14px 18px; cursor:pointer;
+  background:#fafafa; transition:background 0.15s; }
+.folder-header:hover { background:#f0f0f0; }
+
+.folder-left { display:flex; align-items:center; gap:12px; }
+.folder-icon { font-size:1.4rem; }
+.folder-info { display:flex; flex-direction:column; gap:2px; }
+.folder-title { font-weight:600; color:#1a237e; font-size:0.95rem; }
+.folder-resumen { font-size:0.8rem; color:#888; }
+
+.folder-right { display:flex; align-items:center; gap:12px; }
+.folder-count { font-size:0.82rem; color:#666;
+  background:#e8eaf6; padding:3px 10px; border-radius:12px; }
+.folder-chevron { color:#888; font-size:0.8rem; }
+
+.folder-cards { display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(240px,1fr));
+  gap:12px; padding:12px 18px 16px;
+  background:#f8f9ff; border-top:1px solid #e8eaf6; }
+
+.solo-lectura-badge {
+  font-size:0.82rem; color:#666;
+  background:#f5f5f5; padding:6px 14px;
+  border-radius:6px; border:1px solid #e0e0e0;
+}

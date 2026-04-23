@@ -1,0 +1,30 @@
+<div class="page">
+  <div class="page-header">
+    <h1>{{ isEdit ? 'Editar' : 'Nueva' }} Política</h1>
+    <a routerLink="/politicas" class="btn-back">← Volver</a>
+  </div>
+
+  <form class="form-card" (ngSubmit)="submit()" #f="ngForm">
+    <div class="form-group">
+      <label>Nombre</label>
+      <input type="text" [(ngModel)]="nombre" name="nombre" required />
+    </div>
+    <div class="form-group">
+      <label>Descripción</label>
+      <textarea [(ngModel)]="descripcion" name="descripcion" rows="3" required></textarea>
+    </div>
+
+    <div class="form-group checkbox-group">
+      <input type="checkbox" [(ngModel)]="activa" name="activa" id="activa" />
+      <label for="activa">Política activa</label>
+    </div>
+    @if (error()) {
+      <p class="error-msg">{{ error() }}</p>
+    }
+    <div class="form-actions">
+      <button type="submit" class="btn-primary" [disabled]="loading()">
+        {{ loading() ? 'Guardando...' : (isEdit ? 'Actualizar' : 'Crear Política') }}
+      </button>
+    </div>
+  </form>
+</div>

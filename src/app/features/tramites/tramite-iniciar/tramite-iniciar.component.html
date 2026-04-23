@@ -1,0 +1,102 @@
+<div class="page">
+  <h1>Iniciar Trámite</h1>
+
+  @if (success()) {
+    <div class="alert-success">{{ success() }}</div>
+  } @else {
+    <div class="form-card">
+      <div class="form-group">
+        <label>Tipo de Trámite *</label>
+        <select [(ngModel)]="politicaSeleccionada" (ngModelChange)="onPoliticaChange()" name="politica">
+          <option [value]="null" disabled>-- Seleccionar --</option>
+          @for (p of politicas(); track p.id) {
+            <option [value]="p.id">{{ p.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      @if (politicaSeleccionada) {
+        @for (p of politicas(); track p.id) {
+          @if (p.id === politicaSeleccionada) {
+            <div class="tipo-info">
+              <p>{{ p.descripcion }}</p>
+              @if (p.pasos?.length) {
+                <strong>Pasos del proceso:</strong>
+                <ul>
+                  @for (paso of p.pasos; track paso.orden) {
+                    <li>{{ paso.orden }}. {{ paso.nombre }}</li>
+                  }
+                </ul>
+              }
+            </div>
+          }
+        }
+      }
+
+      <div class="form-group">
+        <label>Título *</label>
+        <input type="text" [(ngModel)]="titulo" name="titulo"
+               placeholder="Ej: Instalación de medidor en Av. Principal 123" />
+      </div>
+
+      <div class="form-group">
+        <label>Descripción / Motivo</label>
+        <textarea [(ngModel)]="descripcion" name="descripcion" rows="3"
+                  placeholder="Describe el motivo del trámite..."></textarea>
+      </div>
+
+      @if (formularioInicial().length > 0) {
+        <div class="formulario-section">
+          <h3>📋 Datos requeridos</h3>
+          @for (campo of formularioInicial(); track campo.id) {
+            <div class="form-group">
+              <label>
+                {{ campo.etiqueta }}
+                @if (campo.requerido) { <span class="req">*</span> }
+              </label>
+
+              @if (campo.tipo === 'TEXT') {
+                <input type="text" [(ngModel)]="datosFormulario[campo.id]"
+                       [placeholder]="campo.etiqueta" />
+              }
+              @if (campo.tipo === 'TEXTAREA') {
+                <textarea [(ngModel)]="datosFormulario[campo.id]" rows="3"
+                          [placeholder]="campo.etiqueta"></textarea>
+              }
+              @if (campo.tipo === 'NUMBER') {
+                <input type="number" [(ngModel)]="datosFormulario[campo.id]"
+                       [placeholder]="campo.etiqueta" />
+              }
+              @if (campo.tipo === 'DATE') {
+                <input type="date" [(ngModel)]="datosFormulario[campo.id]" />
+              }
+              @if (campo.tipo === 'SELECT') {
+                <select [(ngModel)]="datosFormulario[campo.id]">
+                  <option value="">-- Seleccionar --</option>
+                  @for (op of campo.opciones; track op) {
+                    <option [value]="op">{{ op }}</option>
+                  }
+                </select>
+              }
+              @if (campo.tipo === 'CHECKBOX') {
+                <label class="check-label">
+                  <input type="checkbox" [(ngModel)]="datosFormulario[campo.id]" />
+                  {{ campo.etiqueta }}
+                </label>
+              }
+              @if (campo.tipo === 'FILE') {
+                <input type="file" (change)="datosFormulario[campo.id] = $any($event.target).files[0]?.name" />
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (error()) { <p class="error-msg">{{ error() }}</p> }
+
+      <button class="btn-primary" (click)="submit()" [disabled]="loading()">
+        {{ loading() ? 'Enviando...' : 'Iniciar Trámite' }}
+      </button>
+    </div>
+  }
+</div>

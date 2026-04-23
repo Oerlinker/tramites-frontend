@@ -1,0 +1,26 @@
+<div class="diagramador-page">
+  <div class="diagramador-header">
+    <div class="header-left">
+      <a routerLink="/politicas" class="btn-back">← Volver</a>
+      <h1>{{ isEdit ? 'Editar' : 'Nueva' }} Política de Negocio</h1>
+    </div>
+    <div class="header-right">
+      <input type="text" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" placeholder="Nombre de la política" class="nombre-input"/>
+      <button class="btn-save" (click)="guardar()" [disabled]="loading()">
+        {{ loading() ? 'Guardando...' : 'Guardar Política' }}
+      </button>
+    </div>
+  </div>
+  @if (error()) {
+    <div class="error-bar">{{ error() }}</div>
+  }
+  <div class="desc-bar">
+    <input type="text" [ngModel]="descripcion()" (ngModelChange)="descripcion.set($event)" placeholder="Descripción de la política..." class="desc-input"/>
+    <label class="activa-check">
+      <input type="checkbox" [ngModel]="activa()" (ngModelChange)="activa.set($event)"/> Activa
+    </label>
+  </div>
+  <div class="canvas-container">
+    <iframe id="drawio-frame" [src]="drawioUrl" class="drawio-iframe" frameborder="0"></iframe>
+  </div>
+</div>

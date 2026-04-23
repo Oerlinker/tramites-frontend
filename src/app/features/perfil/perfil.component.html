@@ -1,0 +1,84 @@
+<div class="perfil-page">
+  <div class="perfil-hero">
+    <div class="avatar-large">
+      {{ username.charAt(0).toUpperCase() }}
+    </div>
+    <div class="perfil-hero-info">
+      <h1>{{ username }}</h1>
+      <span class="rol-badge">{{ roles[0] }}</span>
+    </div>
+  </div>
+
+  <div class="perfil-sections">
+
+    <!-- Email Section -->
+    <div class="perfil-section">
+      <div class="section-header" (click)="toggleSeccion('email')">
+        <span>📧 Email</span>
+        <div class="section-header-right">
+          <span class="section-value">{{ email }}</span>
+          <span class="section-chevron">{{ seccionAbierta === 'email' ? '▲' : '▼' }}</span>
+        </div>
+      </div>
+      @if (seccionAbierta === 'email') {
+        <div class="section-body">
+          <div class="form-group">
+            <label>Nuevo email</label>
+            <input type="email" [(ngModel)]="emailNuevo" [placeholder]="email"/>
+          </div>
+          @if (successInfo()) {
+            <div class="alert-success">✅ {{ successInfo() }}</div>
+          }
+          @if (errorInfo()) {
+            <div class="alert-error">{{ errorInfo() }}</div>
+          }
+          <div class="section-actions">
+            <button class="btn-cancel" (click)="toggleSeccion(null)">Cancelar</button>
+            <button class="btn-save" (click)="guardarEmail()" [disabled]="loading()">
+              {{ loading() ? 'Guardando...' : 'Guardar' }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Password Section -->
+    <div class="perfil-section">
+      <div class="section-header" (click)="toggleSeccion('password')">
+        <span>🔒 Contraseña</span>
+        <div class="section-header-right">
+          <span class="section-value">••••••••</span>
+          <span class="section-chevron">{{ seccionAbierta === 'password' ? '▲' : '▼' }}</span>
+        </div>
+      </div>
+      @if (seccionAbierta === 'password') {
+        <div class="section-body">
+          <div class="form-group">
+            <label>Nueva contraseña</label>
+            <input type="password" [(ngModel)]="passwordNueva" placeholder="Mínimo 6 caracteres"/>
+          </div>
+          <div class="form-group">
+            <label>Confirmar contraseña</label>
+            <input type="password" [(ngModel)]="passwordConfirm" placeholder="Repite la contraseña"/>
+            @if (passwordNueva && passwordConfirm && passwordNueva !== passwordConfirm) {
+              <span class="field-error">Las contraseñas no coinciden</span>
+            }
+          </div>
+          @if (successPassword()) {
+            <div class="alert-success">✅ {{ successPassword() }}</div>
+          }
+          @if (errorPassword()) {
+            <div class="alert-error">{{ errorPassword() }}</div>
+          }
+          <div class="section-actions">
+            <button class="btn-cancel" (click)="toggleSeccion(null)">Cancelar</button>
+            <button class="btn-save" (click)="cambiarPassword()" [disabled]="loadingPassword()">
+              {{ loadingPassword() ? 'Cambiando...' : 'Cambiar contraseña' }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+  </div>
+</div>

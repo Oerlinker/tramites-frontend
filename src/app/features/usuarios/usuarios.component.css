@@ -1,0 +1,235 @@
+.page {
+  padding: 2rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+  margin: 0;
+  color: #1a237e;
+  font-size: 1.5rem;
+}
+
+/* Buttons */
+.btn-primary {
+  background: #1a237e;
+  color: #fff;
+  padding: 0.5rem 1.25rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.btn-primary:hover { background: #283593; }
+
+.btn-secondary {
+  background: #f5f5f5;
+  color: #333;
+  padding: 0.5rem 1.25rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.btn-sm {
+  padding: 3px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.btn-editar  { background: #fff3e0; color: #e65100; }
+.btn-editar:hover  { background: #ffe0b2; }
+
+.btn-toggle  { background: #e8f5e9; color: #2e7d32; }
+.btn-toggle:hover  { background: #c8e6c9; }
+
+.btn-eliminar { background: #ffebee; color: #c62828; }
+.btn-eliminar:hover { background: #ffcdd2; }
+
+/* Table */
+.table-wrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+}
+
+.table th {
+  background: #f5f5f5;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #616161;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.875rem;
+  vertical-align: middle;
+}
+
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: #fafafa; }
+
+.acciones {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.empty-row {
+  text-align: center;
+  color: #9e9e9e;
+  padding: 2rem !important;
+}
+
+/* Role badges */
+.roles-list {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.badge-rol {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badge-rol--admin       { background: #e8eaf6; color: #1a237e; }
+.badge-rol--funcionario { background: #e3f2fd; color: #0d47a1; }
+.badge-rol--cliente     { background: #f3e5f5; color: #6a1b9a; }
+
+/* Estado badge */
+.badge-estado {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-estado.activo   { background: #e8f5e9; color: #2e7d32; }
+.badge-estado.inactivo { background: #ffebee; color: #c62828; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #1a237e;
+  font-size: 1.1rem;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #757575;
+  line-height: 1;
+  padding: 4px;
+}
+
+.modal-close:hover { color: #212121; }
+
+/* Form */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.8rem;
+  color: #555;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  box-sizing: border-box;
+}
+
+.form-group input:disabled {
+  background: #f5f5f5;
+  color: #9e9e9e;
+  cursor: not-allowed;
+}
+
+.checkboxes {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 1.25rem;
+}
+
+/* Misc */
+.error-msg   { color: #c62828; font-size: 0.875rem; margin-bottom: 0.75rem; }
+.loading-msg { color: #757575; }

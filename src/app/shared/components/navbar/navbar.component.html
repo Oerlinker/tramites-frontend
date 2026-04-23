@@ -1,0 +1,29 @@
+<nav class="navbar" (click)="$event.stopPropagation()">
+  <div class="navbar-brand">
+    <a routerLink="/dashboard">Trámites</a>
+  </div>
+  <div class="navbar-info">
+    @if (auth.currentUser()) {
+      <div class="user-menu-wrap">
+        <button class="user-btn" (click)="toggleMenu()">
+          <span class="user-avatar">{{ auth.currentUser()!.username.charAt(0).toUpperCase() }}</span>
+          <span class="user-name">{{ auth.currentUser()!.username }}</span>
+          <span class="user-role-badge">{{ auth.getUserRole() }}</span>
+          <span class="chevron">▾</span>
+        </button>
+        @if (menuAbierto()) {
+          <div class="user-dropdown">
+            <a routerLink="/perfil" class="dropdown-item" (click)="cerrarMenu()">
+              👤 Mi Perfil
+            </a>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" (click)="logout(); cerrarMenu()">
+              🚪 Cerrar Sesión
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</nav>
+<div class="nav-overlay" [class.visible]="menuAbierto()" (click)="cerrarMenu()"></div>

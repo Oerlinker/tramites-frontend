@@ -1,0 +1,42 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1a237e;
+  color: #fff;
+  padding: 0 1.5rem;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-brand a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.navbar-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-overlay { display:none; position:fixed; inset:0; z-index:99; }
+.nav-overlay.visible { display:block; }
+
+.user-menu-wrap { position:relative; }
+.user-btn { display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); border-radius:8px; padding:6px 12px; cursor:pointer; color:#fff; }
+.user-btn:hover { background:rgba(255,255,255,0.25); }
+.user-avatar { width:28px; height:28px; border-radius:50%; background:#fff; color:#1a237e; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; }
+.user-name { font-size:13px; font-weight:500; }
+.user-role-badge { font-size:10px; background:rgba(255,255,255,0.2); padding:2px 7px; border-radius:10px; }
+.chevron { font-size:10px; opacity:0.7; }
+.user-dropdown { position:absolute; right:0; top:calc(100% + 8px); background:#fff; border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,0.15); min-width:180px; z-index:200; overflow:hidden; }
+.dropdown-item { display:block; width:100%; padding:11px 16px; font-size:0.9rem; color:#333; text-decoration:none; cursor:pointer; background:none; border:none; text-align:left; box-sizing:border-box; }
+.dropdown-item:hover { background:#f5f5f5; }
+.dropdown-item.danger { color:#c62828; }
+.dropdown-divider { height:1px; background:#f0f0f0; margin:4px 0; }

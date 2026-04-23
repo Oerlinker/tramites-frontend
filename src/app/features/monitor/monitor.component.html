@@ -1,0 +1,177 @@
+<div class="page">
+  <div class="page-header">
+    <h1>{{ auth.getUserRole() === 'ADMIN' ? 'Monitor de Actividades' : 'Mis Actividades' }}</h1>
+  </div>
+
+  @if (error()) { <div class="alert-error">{{ error() }}</div> }
+
+  @if (loading()) {
+    <p class="loading-msg">Cargando actividades...</p>
+  } @else if (actividades().length === 0) {
+    <div class="empty-state">
+      <p>✅ No hay actividades pendientes en tu departamento.</p>
+    </div>
+  } @else {
+    <div class="tramites-list">
+      @for (tramiteId of getTramiteKeys(); track tramiteId) {
+        @let acts = tramitesAgrupados().get(tramiteId)!;
+        <div class="tramite-folder" [class]="getTramiteColorClass(acts)">
+          <div class="folder-header" (click)="toggleTramite(tramiteId)">
+            <div class="folder-left">
+              <span class="folder-icon">
+                {{ isTramiteExpandido(tramiteId) ? '📂' : '📁' }}
+              </span>
+              <div class="folder-info">
+                <span class="folder-title">Trámite #{{ tramiteId.substring(0,8) }}...</span>
+                <span class="folder-resumen">{{ getTramiteEstadoResumen(acts) }}</span>
+              </div>
+            </div>
+            <div class="folder-right">
+              <span class="folder-count">{{ acts.length }} actividades</span>
+              <span class="folder-chevron">
+                {{ isTramiteExpandido(tramiteId) ? '▲' : '▼' }}
+              </span>
+            </div>
+          </div>
+
+          @if (isTramiteExpandido(tramiteId)) {
+            <div class="folder-cards">
+              @for (a of acts; track a.id) {
+                <div class="actividad-card" [class]="'card-' + a.estado?.toLowerCase()"
+                     (click)="abrirActividad(a)">
+                  <div class="card-header">
+                    <span class="card-nombre">{{ a.nombre }}</span>
+                    <span [class]="'badge ' + getEstadoClass(a.estado)">{{ a.estado }}</span>
+                  </div>
+                  <div class="card-body">
+                    @if (a.nombreDepartamento) {
+                      <p class="card-depto">📁 {{ a.nombreDepartamento }}</p>
+                    }
+                    @if (a.formularioDefinicion?.length > 0) {
+                      <p class="card-form-hint">📋 {{ a.formularioDefinicion.length }} campo(s)</p>
+                    }
+                  </div>
+                  <div class="card-footer">
+                    <button class="btn-atender" [disabled]="a.estado === 'COMPLETADO'">
+                      {{ a.estado === 'COMPLETADO' ? '✓ Completada' : 'Atender' }}
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- MODAL ATENDER ACTIVIDAD -->
+@if (mostrarModal()) {
+  <div class="modal-overlay" (click)="cerrarModal()">
+    <div class="modal-atender" (click)="$event.stopPropagation()">
+      @if (actividadSeleccionada(); as a) {
+        <div class="modal-header">
+          <h2>{{ a.nombre }}</h2>
+          <button class="btn-close" (click)="cerrarModal()">✕</button>
+        </div>
+
+        <div class="modal-meta">
+          <span [class]="'badge ' + getEstadoClass(a.estado)">{{ a.estado }}</span>
+          <span class="meta-depto">📁 {{ a.nombreDepartamento || a.rolRequerido }}</span>
+          <span class="meta-tramite">Trámite: #{{ a.tramiteId?.substring(0,8) }}...</span>
+        </div>
+
+        @if (a.descripcion) {
+          <p class="modal-desc">{{ a.descripcion }}</p>
+        }
+
+        <!-- Datos del cliente (read-only) -->
+        @if (getDatosCliente().length > 0) {
+          <div class="datos-cliente-section">
+            <h3>👤 Datos del solicitante</h3>
+            <div class="datos-cliente-grid">
+              @for (dato of getDatosCliente(); track dato.etiqueta) {
+                <div class="dato-item">
+                  <span class="dato-label">{{ dato.etiqueta }}</span>
+                  <span class="dato-valor">{{ dato.valor }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        @if (a.formularioDefinicion?.length > 0) {
+          <div class="formulario-section">
+            <h3>📋 {{ (a.estado === 'COMPLETADO' || a._soloLectura) ? 'Datos registrados' : 'Completar formulario' }}</h3>
+
+            @for (campo of a.formularioDefinicion; track campo.id) {
+              <div class="form-group">
+                <label>
+                  {{ campo.etiqueta }}
+                  @if (campo.requerido) { <span class="req">*</span> }
+                </label>
+
+                @if (a.estado === 'COMPLETADO' || a._soloLectura) {
+                  <div class="valor-readonly">
+                    {{ a.datosFormulario?.[campo.id] ?? '—' }}
+                  </div>
+                } @else {
+                  @if (campo.tipo === 'TEXT') {
+                    <input type="text" [(ngModel)]="datosFormulario[campo.id]"
+                           [placeholder]="campo.etiqueta" />
+                  }
+                  @if (campo.tipo === 'TEXTAREA') {
+                    <textarea [(ngModel)]="datosFormulario[campo.id]" rows="3"></textarea>
+                  }
+                  @if (campo.tipo === 'NUMBER') {
+                    <input type="number" [(ngModel)]="datosFormulario[campo.id]" />
+                  }
+                  @if (campo.tipo === 'DATE') {
+                    <input type="date" [(ngModel)]="datosFormulario[campo.id]" />
+                  }
+                  @if (campo.tipo === 'SELECT') {
+                    <select [(ngModel)]="datosFormulario[campo.id]">
+                      <option value="">-- Seleccionar --</option>
+                      @for (op of campo.opciones; track op) {
+                        <option [value]="op">{{ op }}</option>
+                      }
+                    </select>
+                  }
+                  @if (campo.tipo === 'CHECKBOX') {
+                    <label class="check-label">
+                      <input type="checkbox" [(ngModel)]="datosFormulario[campo.id]" />
+                      {{ campo.etiqueta }}
+                    </label>
+                  }
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="sin-formulario">
+            <p>Esta actividad no requiere datos adicionales.</p>
+          </div>
+        }
+
+        @if (errorModal()) {
+          <div class="alert-error">{{ errorModal() }}</div>
+        }
+
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="cerrarModal()">Cerrar</button>
+          @if (!a._soloLectura) {
+            @if (a.estado === 'PENDIENTE') {
+              <button class="btn-iniciar" (click)="iniciarActividad()">▶ Iniciar</button>
+            }
+            @if (a.estado === 'EN_PROCESO' || a.estado === 'PENDIENTE') {
+              <button class="btn-completar" (click)="completarActividad()">✓ Completar</button>
+            }
+          } @else {
+            <span class="solo-lectura-badge">👁 Solo lectura</span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

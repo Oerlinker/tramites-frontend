@@ -1,0 +1,49 @@
+<div class="page">
+  <div class="page-header">
+    <h1>Políticas de Negocio</h1>
+    <a routerLink="nueva" class="btn-primary">+ Nueva Política</a>
+  </div>
+
+  @if (error()) {
+    <p class="error-msg">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p>Cargando...</p>
+  } @else if (politicas().length === 0) {
+    <p class="empty">No hay políticas registradas.</p>
+  } @else {
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nombre</th><th>Descripción</th><th>Pasos</th><th>Estado</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of politicas(); track p.id) {
+          <tr>
+            <td>{{ p.nombre }}</td>
+            <td>{{ p.descripcion }}</td>
+            <td>{{ p.pasos?.length ?? 0 }} pasos</td>
+            <td>
+              <span class="badge" [class.active]="p.activa" [class.inactive]="!p.activa">
+                {{ p.activa ? 'Activa' : 'Inactiva' }}
+              </span>
+            </td>
+            <td class="actions">
+              <a [routerLink]="['editar', p.id]" class="btn-sm">Editar</a>
+              <a [routerLink]="['ver', p.id]" class="btn-sm btn-ver">Ver</a>
+              <a [routerLink]="['/politicas/colaborar', p.id]" class="btn-sm btn-colaborar">
+                👥 Colaborar
+              </a>
+              <button class="btn-sm btn-toggle" (click)="toggleActiva(p)">
+                {{ p.activa ? 'Desactivar' : 'Activar' }}
+              </button>
+              <button class="btn-sm btn-danger" (click)="eliminar(p.id)">Eliminar</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

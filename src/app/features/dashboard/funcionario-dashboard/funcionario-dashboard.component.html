@@ -1,0 +1,43 @@
+<div class="dashboard">
+  <h1>Panel Funcionario</h1>
+
+  <div class="stats-row">
+    <div class="stat-card border-red">
+      <span class="stat-label">Mis Actividades Pendientes</span>
+      <span class="stat-value">{{ pendientes() }}</span>
+    </div>
+    <div class="stat-card border-blue">
+      <span class="stat-label">En Proceso</span>
+      <span class="stat-value">{{ enProceso() }}</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h3>Últimas actividades pendientes</h3>
+      <a routerLink="/monitor">Ver todas</a>
+    </div>
+
+    @if (loading()) {
+      <p>Cargando...</p>
+    } @else if (actividadesRecientes().length === 0) {
+      <p class="empty">No hay actividades pendientes.</p>
+    } @else {
+      <div class="act-list">
+        @for (a of actividadesRecientes(); track a.id) {
+          <div class="act-row">
+            <div class="act-info">
+              <span class="act-nombre">{{ a.nombre ?? 'Actividad #' + a.id }}</span>
+              <span class="act-tramite">Trámite #{{ a.tramiteId }}</span>
+            </div>
+            <span class="badge" [class.badge-pendiente]="a.estado === 'PENDIENTE'"
+                                [class.badge-enproceso]="a.estado === 'EN_PROCESO'">
+              {{ a.estado === 'EN_PROCESO' ? 'EN PROCESO' : a.estado }}
+            </span>
+            <a routerLink="/monitor" class="btn-ver">Ver</a>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

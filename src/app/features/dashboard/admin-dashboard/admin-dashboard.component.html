@@ -1,0 +1,78 @@
+<div class="dashboard">
+  <h1>Panel Administrador</h1>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-label">Total Usuarios</span>
+      <span class="stat-value">{{ totalUsuarios() }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Total Trámites</span>
+      <span class="stat-value">{{ totalTramites() }}</span>
+    </div>
+    <div class="stat-card warning">
+      <span class="stat-label">Pendientes</span>
+      <span class="stat-value">{{ tramitesPendientes() }}</span>
+    </div>
+    <div class="stat-card success">
+      <span class="stat-label">Finalizados</span>
+      <span class="stat-value">{{ tramitesFinalizados() }}</span>
+    </div>
+  </div>
+  <div class="quick-links">
+    <h3>Accesos rápidos</h3>
+    <a href="/politicas">Gestionar Políticas</a>
+    <a href="/tramites">Ver Trámites</a>
+    <a href="/monitor">Monitor de Actividad</a>
+    <a href="/departamentos">Gestionar Departamentos</a>
+    <a href="/usuarios">Gestionar Usuarios</a>
+  </div>
+
+  <div class="section-usuarios">
+    <h2>Usuarios</h2>
+    @if (errorUsuarios()) { <p class="error-msg">{{ errorUsuarios() }}</p> }
+    @if (usuarios().length === 0) {
+      <p class="empty">No hay usuarios registrados.</p>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>Roles</th>
+            <th>Departamento</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of usuarios(); track u.id) {
+            <tr>
+              <td>{{ u.username }}</td>
+              <td>{{ u.email }}</td>
+              <td>{{ u.roles.join(', ') }}</td>
+              <td>
+                @if (asignandoDeptoUserId === u.id) {
+                  <select [(ngModel)]="deptoSeleccionado">
+                    <option value="">— Sin departamento —</option>
+                    @for (d of departamentos(); track d.id) {
+                      <option [value]="d.id">{{ d.nombre }}</option>
+                    }
+                  </select>
+                } @else {
+                  {{ getNombreDepto(u.departamentoId) }}
+                }
+              </td>
+              <td class="actions">
+                @if (asignandoDeptoUserId === u.id) {
+                  <button class="btn-sm" (click)="guardarDepartamento(u.id)">Guardar</button>
+                  <button class="btn-sm btn-cancel" (click)="cancelarAsignacion()">Cancelar</button>
+                } @else {
+                  <button class="btn-sm" (click)="iniciarAsignacion(u)">Asignar Depto.</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
