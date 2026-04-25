@@ -37,6 +37,6 @@ export class ApiService {
   }
 
   consultarIA(texto: string, contexto?: string): Observable<any> {
-    return this.http.post('http://localhost:8001/api/ia/consulta', { texto, contexto });
+    return this.http.post('http://127.0.0.1:8000/api/ia/consulta', { texto, contexto });
   }
 }

@@ -125,12 +125,25 @@ const LANE_HEIGHT = 160;
         <button class="ia-close" (click)="mostrarPanelIA.set(false)">✕</button>
       </div>
       <div class="ia-panel-body">
-        <p class="ia-hint">Describe el proceso y la IA generará los elementos del diagrama.</p>
+        <div class="ia-modo-selector">
+          <button class="ia-modo-btn" [class.active]="modoIA() === 'generar'" (click)="modoIA.set('generar')">
+            🆕 Generar nuevo diagrama
+          </button>
+          <button class="ia-modo-btn" [class.active]="modoIA() === 'editar'" (click)="modoIA.set('editar')">
+            ✏️ Modificar diagrama actual
+          </button>
+        </div>
+        <p class="ia-hint">
+          @if (modoIA() === 'generar') { Describe el proceso y la IA generará un diagrama nuevo. }
+          @else { Indica qué cambiar y la IA modificará el diagrama existente. }
+        </p>
         <textarea
           [(ngModel)]="consultaIA"
           class="ia-textarea"
           rows="5"
-          placeholder="Ej: proceso de aprobación de facturas con revisión del contador"
+          [placeholder]="modoIA() === 'generar'
+            ? 'Ej: proceso de aprobación de facturas con revisión del contador'
+            : 'Ej: agrega una actividad de verificación de identidad antes del pago'"
           [disabled]="cargandoIA()">
         </textarea>
         @if (iaExito()) {
@@ -409,6 +422,10 @@ const LANE_HEIGHT = 160;
 @keyframes spin { to { transform:rotate(360deg); } }
 .ia-success { background:#e8f5e9; color:#2e7d32; padding:6px 10px; border-radius:5px; font-size:11px; }
 .ia-error   { background:#ffebee; color:#c62828; padding:6px 10px; border-radius:5px; font-size:11px; }
+.ia-modo-selector { display:flex; gap:6px; margin-bottom:6px; }
+.ia-modo-btn { flex:1; padding:5px 8px; font-size:11px; font-weight:500; border:1.5px solid #1a237e; border-radius:5px; cursor:pointer; background:#fff; color:#1a237e; transition:background 0.15s, color 0.15s; }
+.ia-modo-btn:hover:not(.active) { background:#e8eaf6; }
+.ia-modo-btn.active { background:#1a237e; color:#fff; }
   `]
 })
 export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -934,6 +951,7 @@ export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDe
   iaExito = signal(false);
   iaError = signal('');
   departamentosDisponibles = signal<string[]>([]);
+  modoIA = signal<'generar' | 'editar'>('generar');
 
   abrirPanelIA(): void {
     this.mostrarPanelIA.update(v => !v);
@@ -954,11 +972,42 @@ export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDe
 
   enviarConsultaIA(): void {
     if (!this.consultaIA.trim()) return;
-    if (!confirm('¿Generar diagrama con IA? Esto reemplazará el diagrama actual.')) return;
+
+    const esGenerar = this.modoIA() === 'generar';
+
+    if (esGenerar && !confirm('¿Generar diagrama con IA? Esto reemplazará el diagrama actual.')) return;
+
     this.cargandoIA.set(true);
     this.iaExito.set(false);
     this.iaError.set('');
-    const contexto = `Usa EXACTAMENTE estos nombres para los swimlanes (son los departamentos reales del sistema): ${this.departamentosDisponibles().join(', ')}. Agrega también un swimlane "Cliente" para el solicitante. No uses otros nombres de swimlanes.`;
+
+    let contexto: string;
+    if (esGenerar) {
+      contexto = `Usa EXACTAMENTE estos nombres para los swimlanes (son los departamentos reales del sistema): ${this.departamentosDisponibles().join(', ')}. Agrega también un swimlane "Cliente" para el solicitante. No uses otros nombres de swimlanes.`;
+    } else {
+      const diagramaActual = JSON.stringify({
+        lanes: this.lanes,
+        nodes: this.nodes.map(n => ({
+          id: n.id, type: n.type, label: n.label,
+          lane: n.lane, orden: this.nodes.indexOf(n) + 1
+        })),
+        connections: this.connections
+      });
+      contexto = `
+DIAGRAMA ACTUAL (modifícalo según la instrucción del usuario):
+${diagramaActual}
+
+Departamentos disponibles: ${this.departamentosDisponibles().join(', ')}
+
+INSTRUCCIONES:
+- Devuelve el diagrama COMPLETO modificado, no solo los cambios
+- Mantén los nodos existentes que no deban cambiar
+- Puedes agregar, eliminar o modificar nodos según la instrucción
+- Usa EXACTAMENTE los mismos nombres de swimlanes del diagrama actual
+- Responde SOLO con el JSON válido, sin texto adicional
+      `.trim();
+    }
+
     this.api.consultarIA(this.consultaIA, contexto).subscribe({
       next: (res: any) => {
         const elementos: any[] = res.elementos ?? res.elements ?? [];
