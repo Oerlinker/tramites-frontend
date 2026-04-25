@@ -37,6 +37,6 @@ export class ApiService {
   }
 
   consultarIA(texto: string, contexto?: string): Observable<any> {
-    return this.http.post('http://127.0.0.1:8000/api/ia/consulta', { texto, contexto });
+    return this.http.post('https://tramites-ia-332395305311.us-central1.run.app/api/ia/consulta', { texto, contexto });
   }
 }
