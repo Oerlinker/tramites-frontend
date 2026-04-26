@@ -65,8 +65,6 @@ export class MonitorComponent implements OnInit, OnDestroy {
 
         detalle.formularioDefinicion?.forEach((c: any) => {
           this.datosFormulario[c.id] = detalle.datosFormulario?.[c.id]
-            ?? detalle.datosFormulario?.[c.etiqueta]
-            ?? detalle.datosFormulario?.[c.etiqueta?.toLowerCase()]
             ?? (c.tipo === 'CHECKBOX' ? false : '');
         });
 
