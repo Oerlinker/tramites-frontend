@@ -65,6 +65,8 @@ export class MonitorComponent implements OnInit, OnDestroy {
 
         detalle.formularioDefinicion?.forEach((c: any) => {
           this.datosFormulario[c.id] = detalle.datosFormulario?.[c.id]
+            ?? detalle.datosFormulario?.[c.etiqueta]
+            ?? detalle.datosFormulario?.[c.etiqueta?.toLowerCase()]
             ?? (c.tipo === 'CHECKBOX' ? false : '');
         });
 
@@ -100,17 +102,12 @@ export class MonitorComponent implements OnInit, OnDestroy {
 
   getDatosCliente(): { etiqueta: string; valor: any }[] {
     const tramite = this.tramiteSeleccionado();
-    if (!tramite?.datos) return [];
-    const pasos = this.politicaPasos();
-    const pasoCliente = pasos.find(p => p.orden === 1);
-    const campos = pasoCliente?.formulario ?? [];
-    return Object.entries(tramite.datos).map(([key, valor]) => {
-      const campo = campos.find((c: any) => c.id === key);
-      return {
-        etiqueta: campo?.etiqueta ?? key,
-        valor: valor ?? '—'
-      };
-    });
+    const actividad = this.actividadSeleccionada();
+    const fuente = tramite?.datosCliente ?? tramite?.formularioInicial ?? actividad?.datosCliente ?? tramite?.datos;
+    if (!fuente) return [];
+    return Object.entries(fuente)
+      .filter(([, valor]) => valor !== null && valor !== undefined && valor !== '')
+      .map(([key, valor]) => ({ etiqueta: key, valor }));
   }
 
   iniciarActividad() {
