@@ -35,7 +35,7 @@ export class MonitorComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.load();
     this.conectarWS();
-    this._refreshInterval = setInterval(() => this.load(), 10000);
+    this._refreshInterval = setInterval(() => this.load(true), 10000);
   }
 
   ngOnDestroy() {
@@ -43,9 +43,9 @@ export class MonitorComponent implements OnInit, OnDestroy {
     if (this.ws) this.ws.close();
   }
 
-  load() {
-    this.loading.set(true);
-    this.error.set('');
+  load(silencioso = false) {
+    if (silencioso && this.mostrarModal()) return;
+    if (!silencioso) { this.loading.set(true); this.error.set(''); }
     const endpoint = this.auth.getUserRole() === 'ADMIN'
       ? '/monitor/actividades'
       : '/monitor/mis-actividades';
@@ -54,9 +54,11 @@ export class MonitorComponent implements OnInit, OnDestroy {
         const content = Array.isArray(res) ? res : (res.content || []);
         this.actividades.set(content);
         this.agruparPorTramite(content);
-        this.loading.set(false);
+        if (!silencioso) this.loading.set(false);
       },
-      error: () => { this.error.set('Error al cargar actividades'); this.loading.set(false); }
+      error: () => {
+        if (!silencioso) { this.error.set('Error al cargar actividades'); this.loading.set(false); }
+      }
     });
   }
 
