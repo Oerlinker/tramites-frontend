@@ -30,9 +30,18 @@ export class MonitorComponent implements OnInit, OnDestroy {
   datosFormulario: Record<string, any> = {};
 
   private ws: WebSocket | null = null;
+  private _refreshInterval: any;
 
-  ngOnInit() { this.load(); this.conectarWS(); }
-  ngOnDestroy() { this.ws?.close(); }
+  ngOnInit() {
+    this.load();
+    this.conectarWS();
+    this._refreshInterval = setInterval(() => this.load(), 10000);
+  }
+
+  ngOnDestroy() {
+    if (this._refreshInterval) clearInterval(this._refreshInterval);
+    if (this.ws) this.ws.close();
+  }
 
   load() {
     this.loading.set(true);
