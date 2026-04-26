@@ -46,9 +46,8 @@ export class MonitorComponent implements OnInit, OnDestroy {
   load(silencioso = false) {
     if (silencioso && this.mostrarModal()) return;
     if (!silencioso) { this.loading.set(true); this.error.set(''); }
-    const endpoint = this.auth.getUserRole() === 'ADMIN'
-      ? '/monitor/actividades'
-      : '/monitor/mis-actividades';
+    const esAdmin = this.auth.currentUser()?.roles?.includes('ADMIN') ?? false;
+    const endpoint = esAdmin ? '/monitor/actividades' : '/monitor/mis-actividades';
     this.api.get<any>(endpoint).subscribe({
       next: res => {
         const content = Array.isArray(res) ? res : (res.content || []);
