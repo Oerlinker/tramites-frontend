@@ -82,8 +82,6 @@ export class MonitorComponent implements OnInit, OnDestroy {
 
         detalle._soloLectura = yaCompletada;
         this.actividadSeleccionada.set(detalle);
-        this.mostrarModal.set(true);
-        this.loadingDetalle.set(false);
 
         this.api.get<any>(`/tramites/${detalle.tramiteId}`).subscribe({
           next: tramite => {
@@ -99,12 +97,14 @@ export class MonitorComponent implements OnInit, OnDestroy {
                     });
                   });
                   this.etiquetasCliente.set(mapa);
+                  this.loadingDetalle.set(false);
+                  this.mostrarModal.set(true);
                 },
-                error: () => {}
+                error: () => { this.loadingDetalle.set(false); this.mostrarModal.set(true); }
               });
             }
           },
-          error: () => {}
+          error: () => { this.loadingDetalle.set(false); this.mostrarModal.set(true); }
         });
       },
       error: () => { this.loadingDetalle.set(false); }
