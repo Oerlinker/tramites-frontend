@@ -26,6 +26,7 @@ export class MonitorComponent implements OnInit, OnDestroy {
   errorModal = signal('');
   connected = signal(false);
   mostrarModal = signal(false);
+  etiquetasCliente = signal<Record<string, string>>({});
   datosFormulario: Record<string, any> = {};
 
   private ws: WebSocket | null = null;
@@ -56,6 +57,7 @@ export class MonitorComponent implements OnInit, OnDestroy {
     this.datosFormulario = {};
     this.tramiteSeleccionado.set(null);
     this.politicaPasos.set([]);
+    this.etiquetasCliente.set({});
 
     this.api.get<any>(`/actividades/${actividad.id}`).subscribe({
       next: detalle => {
@@ -78,7 +80,14 @@ export class MonitorComponent implements OnInit, OnDestroy {
             this.tramiteSeleccionado.set(tramite);
             if (tramite.politicaId) {
               this.api.get<any>(`/politicas/${tramite.politicaId}`).subscribe({
-                next: politica => this.politicaPasos.set(politica.pasos ?? []),
+                next: politica => {
+                  this.politicaPasos.set(politica.pasos ?? []);
+                  const mapa: Record<string, string> = {};
+                  politica.actividades?.[0]?.formularioDefinicion?.forEach((c: any) => {
+                    mapa[c.id] = c.etiqueta ?? c.id;
+                  });
+                  this.etiquetasCliente.set(mapa);
+                },
                 error: () => {}
               });
             }
@@ -95,17 +104,19 @@ export class MonitorComponent implements OnInit, OnDestroy {
     this.actividadSeleccionada.set(null);
     this.tramiteSeleccionado.set(null);
     this.politicaPasos.set([]);
+    this.etiquetasCliente.set({});
     this.errorModal.set('');
   }
 
   getDatosCliente(): { etiqueta: string; valor: any }[] {
     const tramite = this.tramiteSeleccionado();
     const actividad = this.actividadSeleccionada();
-    const fuente = tramite?.datosCliente ?? tramite?.formularioInicial ?? actividad?.datosCliente ?? tramite?.datos;
+    const fuente = tramite?.datos ?? tramite?.datosCliente ?? actividad?.datos;
     if (!fuente) return [];
+    const mapa = this.etiquetasCliente();
     return Object.entries(fuente)
       .filter(([, valor]) => valor !== null && valor !== undefined && valor !== '')
-      .map(([key, valor]) => ({ etiqueta: key, valor }));
+      .map(([key, valor]) => ({ etiqueta: mapa[key] ?? key, valor }));
   }
 
   iniciarActividad() {
