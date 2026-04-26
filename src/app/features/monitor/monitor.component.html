@@ -114,7 +114,7 @@
 
                 @if (a.estado === 'COMPLETADO' || a._soloLectura) {
                   <div class="valor-readonly">
-                    {{ a.datosFormulario?.[campo.id] ?? '—' }}
+                    {{ datosFormulario[campo.id] !== '' && datosFormulario[campo.id] !== false && datosFormulario[campo.id] !== null && datosFormulario[campo.id] !== undefined ? datosFormulario[campo.id] : (a.datosFormulario?.[campo.id] ?? '—') }}
                   </div>
                 } @else {
                   @if (campo.tipo === 'TEXT') {

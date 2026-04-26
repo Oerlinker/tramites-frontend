@@ -93,8 +93,10 @@ export class MonitorComponent implements OnInit, OnDestroy {
                 next: politica => {
                   this.politicaPasos.set(politica.pasos ?? []);
                   const mapa: Record<string, string> = {};
-                  politica.actividades?.[0]?.formularioDefinicion?.forEach((c: any) => {
-                    mapa[c.id] = c.etiqueta ?? c.id;
+                  (politica.pasos ?? []).forEach((paso: any) => {
+                    (paso.formulario ?? []).forEach((c: any) => {
+                      mapa[c.id] = c.etiqueta ?? c.id;
+                    });
                   });
                   this.etiquetasCliente.set(mapa);
                 },
