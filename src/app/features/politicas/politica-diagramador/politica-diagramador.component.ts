@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, signal, inject, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, signal, inject, ElementRef, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
@@ -436,6 +436,7 @@ export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDe
   private router = inject(Router);
   private api = inject(ApiService);
   protected colab = inject(ColaboracionService);
+  private cdr = inject(ChangeDetectorRef);
 
   readonly LANE_HEIGHT = LANE_HEIGHT;
 
@@ -577,6 +578,7 @@ export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDe
               if (msg.connections) this.connections = msg.connections;
 
               this.renderConnections();
+              this.cdr.detectChanges();
             });
           }
         }
@@ -658,11 +660,25 @@ export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDe
     e.stopPropagation();
     const startX = e.clientX - node.x;
     const startY = e.clientY - node.y;
+    let stableTop = 0;
+    const stableDims: { id: string; top: number; height: number }[] = [];
+    for (const lane of this.lanes) {
+      const count = this.nodes.filter(n => n.id !== node.id && n.lane === lane.id).length;
+      const height = Math.max(LANE_HEIGHT, count * 60 + 40);
+      stableDims.push({ id: lane.id, top: stableTop, height });
+      stableTop += height;
+    }
+    const getStableLaneFromY = (y: number): string => {
+      for (const dim of stableDims) {
+        if (y < dim.top + dim.height) return dim.id;
+      }
+      return stableDims[stableDims.length - 1].id;
+    };
     let lastBroadcast = 0;
     const onMove = (ev: MouseEvent) => {
       node.x = ev.clientX - startX;
       node.y = ev.clientY - startY;
-      node.lane = this.getLaneFromY(node.y);
+      node.lane = getStableLaneFromY(node.y);
       this.renderConnections();
       const now = Date.now();
       if (this.isColaborativo && now - lastBroadcast > 16) {
@@ -678,6 +694,7 @@ export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDe
     const onUp = () => {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
+      this.renderConnections();
     };
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
