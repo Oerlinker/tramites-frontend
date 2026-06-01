@@ -100,3 +100,17 @@ export interface ApiError {
   mensaje: string;
   timestamp: string;
 }
+
+export interface Documento {
+  id: string;
+  nombre: string;
+  tipo: string;
+  url: string;
+  gcsPath: string;
+  size: number;
+  subidoPor: string;
+  politicaId?: string;
+  tramiteId?: string;
+  actividadId?: string;
+  fechaSubida: string;
+}

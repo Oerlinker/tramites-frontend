@@ -1,0 +1,56 @@
+<div class="page">
+  <div class="page-header">
+    <h1>Subir Documento</h1>
+    <a routerLink="/documentos" class="btn-sm">Volver</a>
+  </div>
+
+  @if (exito()) {
+    <div class="success-msg">Documento subido correctamente. Redirigiendo...</div>
+  } @else {
+    <div class="upload-form">
+      <div
+        class="drop-zone"
+        [class.drag-over]="dragOver"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event)"
+        (click)="fileInput.click()"
+      >
+        @if (archivo) {
+          <p class="file-info">
+            <strong>{{ archivo.name }}</strong>
+            <span>{{ formatSize(archivo.size) }}</span>
+          </p>
+        } @else {
+          <p>Arrastra un archivo aquí o <span class="link">haz clic para seleccionar</span></p>
+        }
+        <input #fileInput type="file" hidden (change)="onFileChange($event)" />
+      </div>
+
+      <div class="field-group">
+        <label>Contexto</label>
+        <select [(ngModel)]="tipoContexto">
+          <option value="libre">Sin contexto (libre)</option>
+          <option value="politica">Política</option>
+          <option value="tramite">Trámite</option>
+          <option value="actividad">Actividad</option>
+        </select>
+      </div>
+
+      @if (tipoContexto !== 'libre') {
+        <div class="field-group">
+          <label>ID de {{ getTipoLabel() }}</label>
+          <input type="text" [(ngModel)]="contextoId" [placeholder]="'ID de ' + getTipoLabel()" />
+        </div>
+      }
+
+      @if (error()) {
+        <p class="error-msg">{{ error() }}</p>
+      }
+
+      <button class="btn-primary" [disabled]="!archivo || loading()" (click)="subir()">
+        @if (loading()) { Subiendo... } @else { Subir Documento }
+      </button>
+    </div>
+  }
+</div>

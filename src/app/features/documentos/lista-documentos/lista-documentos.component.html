@@ -1,0 +1,61 @@
+<div class="page">
+  <div class="page-header">
+    <h1>Gestión Documental</h1>
+    <a routerLink="upload" class="btn-primary">+ Subir Documento</a>
+  </div>
+
+  <div class="search-panel">
+    <select [(ngModel)]="tipoContexto">
+      <option value="politica">Política</option>
+      <option value="tramite">Trámite</option>
+      <option value="actividad">Actividad</option>
+    </select>
+    <input
+      type="text"
+      [(ngModel)]="contextoId"
+      placeholder="ID del contexto"
+      (keyup.enter)="buscar()"
+    />
+    <button class="btn-primary" (click)="buscar()">Buscar</button>
+  </div>
+
+  @if (error()) {
+    <p class="error-msg">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p>Cargando...</p>
+  } @else {
+    @if (documentos().length === 0) {
+      <p class="empty">No hay documentos.</p>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Tamaño</th>
+            <th>Fecha</th>
+            <th>Subido por</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (doc of documentos(); track doc.id) {
+            <tr>
+              <td>{{ doc.nombre }}</td>
+              <td>{{ doc.tipo }}</td>
+              <td>{{ formatSize(doc.size) }}</td>
+              <td>{{ doc.fechaSubida | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ doc.subidoPor }}</td>
+              <td class="actions">
+                <a [href]="doc.url" target="_blank" rel="noopener" class="btn-sm">Descargar</a>
+                <button class="btn-sm btn-danger" (click)="eliminar(doc)">Eliminar</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  }
+</div>

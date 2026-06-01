@@ -1,0 +1,70 @@
+.upload-form {
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.drop-zone {
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  background: #fafafa;
+  color: #6b7280;
+}
+
+.drop-zone:hover,
+.drop-zone.drag-over {
+  border-color: #6366f1;
+  background: #f0f0ff;
+}
+
+.drop-zone .link {
+  color: #6366f1;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: #111827;
+}
+
+.file-info span {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.field-group select,
+.field-group input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.success-msg {
+  padding: 1rem 1.25rem;
+  background: #d1fae5;
+  color: #065f46;
+  border-radius: 8px;
+  font-weight: 500;
+  max-width: 600px;
+}

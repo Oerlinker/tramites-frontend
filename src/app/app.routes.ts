@@ -73,5 +73,12 @@ export const routes: Routes = [
     loadChildren: () => import('./features/analitica/analitica.routes').then(m => m.ANALITICA_ROUTES)
   },
 
+  {
+    path: 'documentos',
+    canActivate: [authGuard],
+    loadComponent: () => import('./layout/layout.component').then(m => m.LayoutComponent),
+    loadChildren: () => import('./features/documentos/documentos.routes').then(m => m.DOCUMENTOS_ROUTES)
+  },
+
   { path: '**', redirectTo: '/dashboard' }
 ];

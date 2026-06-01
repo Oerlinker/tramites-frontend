@@ -3,6 +3,7 @@
     <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
       Dashboard
     </a>
+    <a routerLink="/documentos" routerLinkActive="active">Documentos</a>
 
     @if (auth.getUserRole() === 'ADMIN') {
       <a routerLink="/politicas" routerLinkActive="active">Políticas</a>
