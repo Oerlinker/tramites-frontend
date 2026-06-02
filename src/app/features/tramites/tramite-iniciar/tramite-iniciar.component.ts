@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
+import { NlpService, RecomendacionPolitica } from '../../../core/services/nlp.service';
 import { Politica, Tramite } from '../../../shared/models';
 
 @Component({
@@ -14,6 +15,7 @@ import { Politica, Tramite } from '../../../shared/models';
 export class TramiteIniciarComponent implements OnInit {
   private api = inject(ApiService);
   private router = inject(Router);
+  private nlp = inject(NlpService);
 
   politicas = signal<Politica[]>([]);
   politicaSeleccionada: string | null = null;
@@ -25,6 +27,11 @@ export class TramiteIniciarComponent implements OnInit {
 
   formularioInicial = signal<any[]>([]);
   datosFormulario: Record<string, any> = {};
+
+  descripcionIA = '';
+  cargandoRecomendacion = signal(false);
+  recomendacion = signal<RecomendacionPolitica | null>(null);
+  errorRecomendacion = signal('');
 
   ngOnInit() {
     this.api.get<Politica[]>('/politicas?soloActivas=true').subscribe({
@@ -44,6 +51,36 @@ export class TramiteIniciarComponent implements OnInit {
     pasoConForm?.formulario?.forEach(c => {
       this.datosFormulario[c.id] = c.tipo === 'CHECKBOX' ? false : '';
     });
+  }
+
+  recomendarPoliticaIA(): void {
+    if (!this.descripcionIA.trim()) return;
+    this.cargandoRecomendacion.set(true);
+    this.errorRecomendacion.set('');
+    this.recomendacion.set(null);
+    const politicasPayload = this.politicas().map(p => ({
+      id: p.id,
+      nombre: p.nombre,
+      descripcion: p.descripcion ?? '',
+    }));
+    this.nlp.recomendarPolitica(this.descripcionIA, politicasPayload).subscribe({
+      next: res => {
+        this.recomendacion.set(res);
+        this.cargandoRecomendacion.set(false);
+      },
+      error: err => {
+        this.errorRecomendacion.set(err?.error?.detail ?? err?.message ?? 'Error al consultar IA');
+        this.cargandoRecomendacion.set(false);
+      }
+    });
+  }
+
+  seleccionarPoliticaRecomendada(): void {
+    const rec = this.recomendacion();
+    if (!rec) return;
+    this.politicaSeleccionada = rec.politica_id;
+    this.onPoliticaChange();
+    this.recomendacion.set(null);
   }
 
   submit() {

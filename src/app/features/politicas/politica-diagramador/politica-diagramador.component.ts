@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { ColaboracionService } from '../../../core/services/colaboracion.service';
+import { NlpService, CampoSugerido } from '../../../core/services/nlp.service';
 import { Politica } from '../../../shared/models';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -231,8 +232,42 @@ const LANE_HEIGHT = 160;
         <div class="formulario-editor">
           <div class="form-editor-header">
             <span>📋 Campos del formulario ({{ getFormulario().length }})</span>
-            <button (click)="addCampo()" class="btn-add-campo">+ Agregar campo</button>
+            <div style="display:flex;gap:6px">
+              <button (click)="toggleSugerirCamposIA()" class="btn-sugerir-ia">✨ Sugerir con IA</button>
+              <button (click)="addCampo()" class="btn-add-campo">+ Agregar campo</button>
+            </div>
           </div>
+          @if (mostrarSugerirCamposIA()) {
+            <div class="ia-sugerir-panel">
+              <div style="display:flex;gap:6px;align-items:center">
+                <input [(ngModel)]="descripcionCamposIA"
+                       placeholder="Describe la actividad (ej: solicitar documentos de identidad...)"
+                       class="ia-sugerir-input"
+                       [disabled]="cargandoCamposIA()"/>
+                <button (click)="ejecutarSugerirCamposIA()"
+                        [disabled]="cargandoCamposIA() || !descripcionCamposIA.trim()"
+                        class="btn-sugerir-ejecutar">
+                  @if (cargandoCamposIA()) { ⏳ } @else { Sugerir }
+                </button>
+              </div>
+              @if (errorSugerirCamposIA()) {
+                <div class="ia-sugerir-error">{{ errorSugerirCamposIA() }}</div>
+              }
+              @if (camposSugeridos().length > 0) {
+                <div class="campos-sugeridos-lista">
+                  <span class="campos-sugeridos-title">Clic para agregar al formulario:</span>
+                  @for (cs of camposSugeridos(); track cs.nombre) {
+                    <div class="campo-sugerido-row" (click)="agregarCampoSugerido(cs)">
+                      <span class="campo-sug-etiqueta">{{ cs.etiqueta }}</span>
+                      <span class="campo-sug-tipo">{{ cs.tipo }}</span>
+                      @if (cs.requerido) { <span class="campo-sug-req">Req.</span> }
+                      <span class="campo-sug-add">+ Agregar</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
           @if (getFormulario().length === 0) {
             <span class="no-campos">Sin formulario — esta actividad no requiere datos</span>
           }
@@ -426,6 +461,22 @@ const LANE_HEIGHT = 160;
 .ia-modo-btn { flex:1; padding:5px 8px; font-size:11px; font-weight:500; border:1.5px solid #1a237e; border-radius:5px; cursor:pointer; background:#fff; color:#1a237e; transition:background 0.15s, color 0.15s; }
 .ia-modo-btn:hover:not(.active) { background:#e8eaf6; }
 .ia-modo-btn.active { background:#1a237e; color:#fff; }
+.btn-sugerir-ia { padding:3px 8px; background:#e8eaf6; color:#1a237e; border:1px solid #9fa8da; border-radius:4px; cursor:pointer; font-size:11px; font-weight:500; white-space:nowrap; }
+.btn-sugerir-ia:hover { background:#c5cae9; }
+.ia-sugerir-panel { background:#f3f4fc; border:1px solid #c5cae9; border-radius:5px; padding:8px; margin:6px 0; display:flex; flex-direction:column; gap:6px; }
+.ia-sugerir-input { flex:1; padding:4px 8px; border:1px solid #9fa8da; border-radius:4px; font-size:12px; font-family:inherit; }
+.ia-sugerir-input:focus { outline:none; border-color:#1a237e; }
+.btn-sugerir-ejecutar { padding:4px 10px; background:#1a237e; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; white-space:nowrap; }
+.btn-sugerir-ejecutar:disabled { opacity:0.55; cursor:default; }
+.ia-sugerir-error { color:#c62828; font-size:11px; }
+.campos-sugeridos-lista { display:flex; flex-direction:column; gap:4px; }
+.campos-sugeridos-title { font-size:10px; color:#555; font-style:italic; }
+.campo-sugerido-row { display:flex; align-items:center; gap:6px; padding:4px 8px; background:#fff; border:1px solid #c5cae9; border-radius:4px; cursor:pointer; font-size:11px; }
+.campo-sugerido-row:hover { background:#e8eaf6; border-color:#1a237e; }
+.campo-sug-etiqueta { font-weight:500; color:#1a237e; flex:1; }
+.campo-sug-tipo { color:#757575; font-size:10px; background:#ede7f6; padding:1px 5px; border-radius:3px; }
+.campo-sug-req { color:#c62828; font-size:10px; font-weight:600; }
+.campo-sug-add { margin-left:auto; color:#388e3c; font-weight:500; font-size:10px; }
   `]
 })
 export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -437,6 +488,7 @@ export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDe
   private api = inject(ApiService);
   protected colab = inject(ColaboracionService);
   private cdr = inject(ChangeDetectorRef);
+  private nlp = inject(NlpService);
 
   readonly LANE_HEIGHT = LANE_HEIGHT;
 
@@ -970,6 +1022,12 @@ export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDe
   departamentosDisponibles = signal<string[]>([]);
   modoIA = signal<'generar' | 'editar'>('generar');
 
+  mostrarSugerirCamposIA = signal(false);
+  descripcionCamposIA = '';
+  cargandoCamposIA = signal(false);
+  camposSugeridos = signal<CampoSugerido[]>([]);
+  errorSugerirCamposIA = signal('');
+
   abrirPanelIA(): void {
     this.mostrarPanelIA.update(v => !v);
     this.iaExito.set(false);
@@ -1077,6 +1135,46 @@ INSTRUCCIONES:
         this.iaError.set(err?.error?.detail ?? err?.message ?? 'Error al consultar la IA');
         this.cargandoIA.set(false);
       }
+    });
+  }
+
+  toggleSugerirCamposIA(): void {
+    this.mostrarSugerirCamposIA.update(v => !v);
+    this.camposSugeridos.set([]);
+    this.errorSugerirCamposIA.set('');
+    this.descripcionCamposIA = '';
+  }
+
+  ejecutarSugerirCamposIA(): void {
+    if (!this.descripcionCamposIA.trim()) return;
+    this.cargandoCamposIA.set(true);
+    this.errorSugerirCamposIA.set('');
+    this.camposSugeridos.set([]);
+    this.nlp.sugerirFormulario(this.descripcionCamposIA).subscribe({
+      next: res => {
+        this.camposSugeridos.set(res.campos ?? []);
+        this.cargandoCamposIA.set(false);
+      },
+      error: err => {
+        this.errorSugerirCamposIA.set(err?.error?.detail ?? err?.message ?? 'Error al consultar IA');
+        this.cargandoCamposIA.set(false);
+      }
+    });
+  }
+
+  agregarCampoSugerido(cs: CampoSugerido): void {
+    if (!this.selected) return;
+    if (!this.selected.formulario) this.selected.formulario = [];
+    const tipoMap: Record<string, CampoFormulario['tipo']> = {
+      text: 'TEXT', textarea: 'TEXTAREA', number: 'NUMBER',
+      date: 'DATE', select: 'SELECT', checkbox: 'CHECKBOX', file: 'FILE',
+    };
+    const tipo: CampoFormulario['tipo'] = tipoMap[cs.tipo?.toLowerCase()] ?? (cs.tipo?.toUpperCase() as CampoFormulario['tipo']) ?? 'TEXT';
+    this.selected.formulario.push({
+      id: 'campo_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      etiqueta: cs.etiqueta,
+      tipo,
+      requerido: cs.requerido,
     });
   }
 

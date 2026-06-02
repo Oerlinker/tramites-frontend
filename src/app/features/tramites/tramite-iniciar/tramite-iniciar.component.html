@@ -5,6 +5,32 @@
     <div class="alert-success">{{ success() }}</div>
   } @else {
     <div class="form-card">
+      <div class="ia-recomendar-wrap">
+        <div class="ia-recomendar-header">🤖 ¿No sabes qué tipo de trámite necesitas?</div>
+        <div class="ia-recomendar-body">
+          <textarea [(ngModel)]="descripcionIA" name="descripcionIA" rows="2"
+                    placeholder="Describe brevemente tu trámite y la IA te sugerirá la política correcta..."
+                    [disabled]="cargandoRecomendacion()"></textarea>
+          <button class="btn-recomendar" (click)="recomendarPoliticaIA()"
+                  [disabled]="cargandoRecomendacion() || !descripcionIA.trim()">
+            {{ cargandoRecomendacion() ? 'Analizando...' : '¿Qué política necesito?' }}
+          </button>
+          @if (errorRecomendacion()) {
+            <p class="ia-error-rec">{{ errorRecomendacion() }}</p>
+          }
+          @if (recomendacion()) {
+            <div class="ia-resultado" (click)="seleccionarPoliticaRecomendada()">
+              <div class="ia-resultado-nombre">{{ recomendacion()!.politica_nombre }}</div>
+              <div class="ia-resultado-confianza">
+                Confianza: <strong>{{ (recomendacion()!.confianza * 100).toFixed(0) }}%</strong>
+              </div>
+              <div class="ia-resultado-razon">{{ recomendacion()!.razon }}</div>
+              <div class="ia-resultado-hint">👆 Clic para seleccionar esta política</div>
+            </div>
+          }
+        </div>
+      </div>
+
       <div class="form-group">
         <label>Tipo de Trámite *</label>
         <select [(ngModel)]="politicaSeleccionada" (ngModelChange)="onPoliticaChange()" name="politica">
