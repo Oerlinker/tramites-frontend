@@ -36,4 +36,13 @@ export class NlpService {
       { descripcion, politicas }
     );
   }
+
+  audioAFormulario(audioBlob: Blob, filename: string): Observable<{ transcripcion: string; campos: CampoSugerido[] }> {
+    const fd = new FormData();
+    fd.append('file', audioBlob, filename);
+    return this.http.post<{ transcripcion: string; campos: CampoSugerido[] }>(
+      `${this.baseUrl}/api/ia/audio-formulario`,
+      fd
+    );
+  }
 }

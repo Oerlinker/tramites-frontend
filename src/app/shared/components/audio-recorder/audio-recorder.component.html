@@ -1,0 +1,23 @@
+<div class="audio-recorder">
+  @if (estado() === 'idle' || estado() === 'error') {
+    <button class="ar-btn ar-btn-grabar" (click)="iniciarGrabacion()">🎤 Grabar</button>
+  }
+  @if (estado() === 'grabando') {
+    <button class="ar-btn ar-btn-detener" (click)="detenerGrabacion()">⏹ Detener</button>
+    <span class="ar-estado grabando">● grabando...</span>
+  }
+  @if (estado() === 'procesando') {
+    <span class="ar-estado procesando">⏳ procesando...</span>
+  }
+  @if (estado() === 'listo') {
+    <button class="ar-btn ar-btn-grabar" (click)="reiniciar()">🎤 Grabar</button>
+    <span class="ar-estado listo">✅ transcripción obtenida</span>
+  }
+  @if (errorMsg()) {
+    <span class="ar-estado error">{{ errorMsg() }}</span>
+    <button class="ar-btn ar-btn-grabar" (click)="reiniciar()">🎤 Grabar</button>
+  }
+  @if (transcripcion()) {
+    <div class="ar-transcripcion">{{ transcripcion() }}</div>
+  }
+</div>

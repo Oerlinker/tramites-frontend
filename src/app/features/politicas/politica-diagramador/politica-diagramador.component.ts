@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { ColaboracionService } from '../../../core/services/colaboracion.service';
 import { NlpService, CampoSugerido } from '../../../core/services/nlp.service';
+import { AudioRecorderComponent } from '../../../shared/components/audio-recorder/audio-recorder.component';
 import { Politica } from '../../../shared/models';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -58,7 +59,7 @@ const LANE_HEIGHT = 160;
 
 @Component({
   selector: 'app-politica-diagramador',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, AudioRecorderComponent],
   template: `
 <div class="diag-page">
   <div class="diag-header">
@@ -232,8 +233,9 @@ const LANE_HEIGHT = 160;
         <div class="formulario-editor">
           <div class="form-editor-header">
             <span>📋 Campos del formulario ({{ getFormulario().length }})</span>
-            <div style="display:flex;gap:6px">
+            <div style="display:flex;gap:6px;align-items:center">
               <button (click)="toggleSugerirCamposIA()" class="btn-sugerir-ia">✨ Sugerir con IA</button>
+              <app-audio-recorder (camposSugeridos)="onCamposSugeridosAudio($event)"></app-audio-recorder>
               <button (click)="addCampo()" class="btn-add-campo">+ Agregar campo</button>
             </div>
           </div>
@@ -1176,6 +1178,10 @@ INSTRUCCIONES:
       tipo,
       requerido: cs.requerido,
     });
+  }
+
+  onCamposSugeridosAudio(campos: CampoSugerido[]): void {
+    campos.forEach(cs => this.agregarCampoSugerido(cs));
   }
 
   ngOnDestroy() {
