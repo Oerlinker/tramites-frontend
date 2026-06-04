@@ -25,3 +25,23 @@
   padding:4px 10px; border-radius:5px; cursor:pointer; font-size:0.8rem;
   margin-left:6px;
 }
+
+.btn-ver-docs {
+  padding:3px 10px; background:#fff8e1; color:#795548;
+  border:1px solid #ffe082; border-radius:5px; cursor:pointer;
+  font-size:0.8rem; white-space:nowrap;
+}
+.btn-ver-docs:hover { background:#ffe082; }
+.btn-ver-docs.active { background:#ffe082; }
+
+.docs-expansion-row td { padding:0; }
+.docs-expansion-panel {
+  padding:12px 20px; background:#fffde7;
+  border-top:1px solid #ffe082;
+}
+.docs-cargando, .docs-sin { font-size:0.85rem; color:#999; font-style:italic; }
+.docs-count { font-size:0.82rem; color:#795548; font-weight:600; display:block; margin-bottom:8px; }
+.docs-lista { display:flex; flex-direction:column; gap:6px; }
+.doc-fila { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid #ffe082; border-radius:6px; padding:6px 12px; }
+.doc-nombre { flex:1; font-size:0.85rem; color:#333; }
+.btn-doc-dl-seg { color:#1565c0; text-decoration:none; font-size:0.82rem; white-space:nowrap; }

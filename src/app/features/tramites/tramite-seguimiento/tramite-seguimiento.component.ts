@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Tramite } from '../../../shared/models';
+import { DocumentoService } from '../../../core/services/documento.service';
+import { Tramite, Documento } from '../../../shared/models';
 
 @Component({
   selector: 'app-tramite-seguimiento',
@@ -15,6 +16,7 @@ import { Tramite } from '../../../shared/models';
 export class TramiteSeguimientoComponent implements OnInit {
   private api = inject(ApiService);
   protected auth = inject(AuthService);
+  private docService = inject(DocumentoService);
 
   tramites = signal<Tramite[]>([]);
   totalPages = signal(1);
@@ -22,6 +24,10 @@ export class TramiteSeguimientoComponent implements OnInit {
   loading = signal(true);
   error = signal('');
   filtroEstado = '';
+
+  tramiteDocsAbierto = signal<string | null>(null);
+  docsDelTramite = signal<Documento[]>([]);
+  cargandoDocsTramite = signal(false);
 
   readonly estados = ['PENDIENTE', 'EN_PROCESO', 'COMPLETADO', 'RECHAZADO', 'CANCELADO'];
 
@@ -69,4 +75,20 @@ export class TramiteSeguimientoComponent implements OnInit {
 
   prevPage() { if (this.currentPage() > 0) { this.currentPage.update(p => p - 1); this.load(); } }
   nextPage() { if (this.currentPage() < this.totalPages() - 1) { this.currentPage.update(p => p + 1); this.load(); } }
+
+  toggleDocsTramite(tramiteId: string, event: Event): void {
+    event.stopPropagation();
+    if (this.tramiteDocsAbierto() === tramiteId) {
+      this.tramiteDocsAbierto.set(null);
+      this.docsDelTramite.set([]);
+      return;
+    }
+    this.tramiteDocsAbierto.set(tramiteId);
+    this.docsDelTramite.set([]);
+    this.cargandoDocsTramite.set(true);
+    this.docService.getByTramite(tramiteId).subscribe({
+      next: docs => { this.docsDelTramite.set(docs); this.cargandoDocsTramite.set(false); },
+      error: () => this.cargandoDocsTramite.set(false),
+    });
+  }
 }

@@ -5,7 +5,8 @@ import { ApiService } from '../../../core/services/api.service';
 import { ColaboracionService } from '../../../core/services/colaboracion.service';
 import { NlpService, CampoSugerido } from '../../../core/services/nlp.service';
 import { AudioRecorderComponent } from '../../../shared/components/audio-recorder/audio-recorder.component';
-import { Politica } from '../../../shared/models';
+import { DocumentoService } from '../../../core/services/documento.service';
+import { Politica, Documento } from '../../../shared/models';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -216,7 +217,16 @@ const LANE_HEIGHT = 160;
     </div>
   </div>
   @if (selected && selected.type !== 'inicio' && selected.type !== 'fin') {
-    <div class="node-editor-panel">
+    <div class="drawer-overlay" (click)="onDrawerOverlayClick($event)"></div>
+    <div class="node-drawer">
+      <div class="drawer-header">
+        <span class="drawer-title">
+          @if (selected.type === 'actividad') { 📋 Actividad }
+          @else if (selected.type === 'decision') { 🔀 Decisión }
+        </span>
+        <button class="drawer-close" (click)="selected = null">✕</button>
+      </div>
+      <div class="drawer-body">
       <div class="node-editor-top">
         <label>Etiqueta:</label>
         <input [(ngModel)]="selected.label"
@@ -298,6 +308,26 @@ const LANE_HEIGHT = 160;
             </div>
           }
         </div>
+        <div class="docs-actividad-section">
+          <div class="docs-act-header">
+            <span>📎 Documentos de la actividad ({{ docsActividad().length }})</span>
+            <label class="btn-adj-doc">
+              📎 Adjuntar
+              <input type="file" hidden (change)="subirDocActividad($event)" [disabled]="cargandoDocs()"/>
+            </label>
+          </div>
+          @if (cargandoDocs()) { <span class="docs-loading">Cargando...</span> }
+          @if (!cargandoDocs() && docsActividad().length === 0) {
+            <span class="no-docs-act">Sin documentos adjuntos</span>
+          }
+          @for (doc of docsActividad(); track doc.id) {
+            <div class="doc-act-row">
+              <span class="doc-act-nombre">{{ doc.nombre }}</span>
+              <a [href]="doc.url" target="_blank" class="btn-doc-dl" title="Descargar">⬇</a>
+              <button (click)="eliminarDocActividad(doc.id)" class="btn-doc-del" title="Eliminar">×</button>
+            </div>
+          }
+        </div>
       }
       @if (selected.type === 'decision') {
         <div class="formulario-editor">
@@ -313,6 +343,7 @@ const LANE_HEIGHT = 160;
           }
         </div>
       }
+      </div>
     </div>
   }
   @if (mostrarModalCompartir()) {
@@ -399,8 +430,15 @@ const LANE_HEIGHT = 160;
 .decision-label { display:block; transform:rotate(-45deg); font-size:10px; color:#5d4037; }
 .label-input { padding:3px 8px; border:1px solid #9fa8da; border-radius:4px; font-size:13px; width:200px; }
 .lane-select { padding:3px 6px; border:1px solid #9fa8da; border-radius:4px; font-size:13px; }
-.node-editor-panel { background:#e8eaf6; border-top:2px solid #c5cae9; padding:8px 16px; font-size:13px; height:200px; min-height:200px; overflow-y:auto; flex-shrink:0; }
-.node-editor-top { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+.node-drawer { position:fixed; top:56px; right:0; width:380px; height:calc(100vh - 56px); background:#fff; border-left:2px solid #c5cae9; box-shadow:-4px 0 20px rgba(0,0,0,0.12); z-index:500; display:flex; flex-direction:column; animation:slideInRight 0.2s cubic-bezier(0.4,0,0.2,1); }
+@keyframes slideInRight { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+.drawer-overlay { position:fixed; inset:0; z-index:499; background:transparent; }
+.drawer-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:#1a237e; color:#fff; flex-shrink:0; }
+.drawer-title { font-size:13px; font-weight:600; }
+.drawer-close { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:#fff; width:26px; height:26px; border-radius:50%; cursor:pointer; font-size:13px; display:flex; align-items:center; justify-content:center; transition:background 0.15s; }
+.drawer-close:hover { background:rgba(255,255,255,0.3); }
+.drawer-body { flex:1; overflow-y:auto; padding:14px 16px; font-size:13px; display:flex; flex-direction:column; gap:12px; }
+.node-editor-top { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
 .formulario-editor { background:#fff; border:1px solid #c5cae9; border-radius:6px; padding:8px; }
 .form-editor-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; font-weight:500; font-size:12px; color:#1a237e; }
 .btn-add-campo { padding:3px 10px; background:#1a237e; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; }
@@ -479,6 +517,15 @@ const LANE_HEIGHT = 160;
 .campo-sug-tipo { color:#757575; font-size:10px; background:#ede7f6; padding:1px 5px; border-radius:3px; }
 .campo-sug-req { color:#c62828; font-size:10px; font-weight:600; }
 .campo-sug-add { margin-left:auto; color:#388e3c; font-weight:500; font-size:10px; }
+.docs-actividad-section { background:#fff8e1; border:1px solid #ffe082; border-radius:5px; padding:6px 8px; margin-top:6px; }
+.docs-act-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; font-weight:500; font-size:11px; color:#795548; }
+.btn-adj-doc { padding:2px 8px; background:#fff3e0; color:#795548; border:1px solid #ffe082; border-radius:4px; cursor:pointer; font-size:11px; }
+.btn-adj-doc:hover { background:#ffe082; }
+.docs-loading, .no-docs-act { font-size:11px; color:#999; font-style:italic; }
+.doc-act-row { display:flex; align-items:center; gap:6px; padding:2px 0; font-size:11px; }
+.doc-act-nombre { flex:1; color:#333; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px; }
+.btn-doc-dl { color:#1565c0; text-decoration:none; font-size:13px; }
+.btn-doc-del { background:none; border:none; color:#c62828; font-size:14px; cursor:pointer; padding:0 2px; line-height:1; }
   `]
 })
 export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -491,6 +538,7 @@ export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDe
   protected colab = inject(ColaboracionService);
   private cdr = inject(ChangeDetectorRef);
   private nlp = inject(NlpService);
+  private docService = inject(DocumentoService);
 
   readonly LANE_HEIGHT = LANE_HEIGHT;
 
@@ -771,11 +819,22 @@ export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDe
       return;
     }
     this.selected = node;
+    if (node.type === 'actividad') {
+      this.cargarDocsActividad(node.id);
+    } else {
+      this.docsActividad.set([]);
+    }
   }
 
   onCanvasClick(e: MouseEvent) {
     this.selected = null;
+    this.docsActividad.set([]);
     if (this.connectMode && this.connectFrom) this.connectFrom = null;
+  }
+
+  onDrawerOverlayClick(e: MouseEvent) {
+    this.selected = null;
+    this.docsActividad.set([]);
   }
 
   moveNodeToLane(node: DiagramNode) {
@@ -1030,6 +1089,9 @@ export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDe
   camposSugeridos = signal<CampoSugerido[]>([]);
   errorSugerirCamposIA = signal('');
 
+  docsActividad = signal<Documento[]>([]);
+  cargandoDocs = signal(false);
+
   abrirPanelIA(): void {
     this.mostrarPanelIA.update(v => !v);
     this.iaExito.set(false);
@@ -1182,6 +1244,34 @@ INSTRUCCIONES:
 
   onCamposSugeridosAudio(campos: CampoSugerido[]): void {
     campos.forEach(cs => this.agregarCampoSugerido(cs));
+  }
+
+  cargarDocsActividad(id: string): void {
+    this.cargandoDocs.set(true);
+    this.docsActividad.set([]);
+    this.docService.getByActividad(id).subscribe({
+      next: docs => { this.docsActividad.set(docs); this.cargandoDocs.set(false); },
+      error: () => this.cargandoDocs.set(false),
+    });
+  }
+
+  subirDocActividad(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file || !this.selected) return;
+    const id = this.selected.id;
+    this.cargandoDocs.set(true);
+    this.docService.upload(file, undefined, undefined, id).subscribe({
+      next: doc => { this.docsActividad.update(docs => [...docs, doc]); this.cargandoDocs.set(false); },
+      error: () => this.cargandoDocs.set(false),
+    });
+    (event.target as HTMLInputElement).value = '';
+  }
+
+  eliminarDocActividad(docId: string): void {
+    this.docService.eliminar(docId).subscribe({
+      next: () => this.docsActividad.update(docs => docs.filter(d => d.id !== docId)),
+      error: () => {},
+    });
   }
 
   ngOnDestroy() {

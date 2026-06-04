@@ -1,26 +1,46 @@
-<aside class="sidebar">
+<aside class="sidebar" [class.collapsed]="collapsed()">
+  <button class="sidebar-toggle" (click)="toggle()" [title]="collapsed() ? 'Expandir menú' : 'Colapsar menú'">
+    <span class="toggle-icon">{{ collapsed() ? '»' : '«' }}</span>
+  </button>
   <nav class="sidebar-nav">
-    <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-      Dashboard
+    <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" [title]="'Dashboard'">
+      <span class="nav-icon">⊞</span><span class="nav-label">Dashboard</span>
     </a>
-    <a routerLink="/documentos" routerLinkActive="active">Documentos</a>
-
+    <a routerLink="/documentos" routerLinkActive="active" [title]="'Documentos'">
+      <span class="nav-icon">📁</span><span class="nav-label">Documentos</span>
+    </a>
     @if (auth.getUserRole() === 'ADMIN') {
-      <a routerLink="/politicas" routerLinkActive="active">Políticas</a>
-      <a routerLink="/monitor" routerLinkActive="active">Monitor</a>
-      <a routerLink="/tramites" routerLinkActive="active">Trámites</a>
-      <a routerLink="/departamentos" routerLinkActive="active">Departamentos</a>
-      <a routerLink="/usuarios" routerLinkActive="active">Usuarios</a>
-      <a routerLink="/analitica" routerLinkActive="active">Analítica</a>
+      <a routerLink="/politicas" routerLinkActive="active" [title]="'Políticas'">
+        <span class="nav-icon">📋</span><span class="nav-label">Políticas</span>
+      </a>
+      <a routerLink="/monitor" routerLinkActive="active" [title]="'Monitor'">
+        <span class="nav-icon">🖥</span><span class="nav-label">Monitor</span>
+      </a>
+      <a routerLink="/tramites" routerLinkActive="active" [title]="'Trámites'">
+        <span class="nav-icon">📂</span><span class="nav-label">Trámites</span>
+      </a>
+      <a routerLink="/departamentos" routerLinkActive="active" [title]="'Departamentos'">
+        <span class="nav-icon">🏢</span><span class="nav-label">Departamentos</span>
+      </a>
+      <a routerLink="/usuarios" routerLinkActive="active" [title]="'Usuarios'">
+        <span class="nav-icon">👥</span><span class="nav-label">Usuarios</span>
+      </a>
+      <a routerLink="/analitica" routerLinkActive="active" [title]="'Analítica'">
+        <span class="nav-icon">📊</span><span class="nav-label">Analítica</span>
+      </a>
     }
-
     @if (auth.getUserRole() === 'FUNCIONARIO') {
-      <a routerLink="/monitor" routerLinkActive="active">Mis Actividades</a>
+      <a routerLink="/monitor" routerLinkActive="active" [title]="'Mis Actividades'">
+        <span class="nav-icon">🖥</span><span class="nav-label">Mis Actividades</span>
+      </a>
     }
-
     @if (auth.getUserRole() === 'CLIENTE') {
-      <a routerLink="/tramites/iniciar" routerLinkActive="active">Iniciar Trámite</a>
-      <a routerLink="/tramites" routerLinkActive="active">Mis Trámites</a>
+      <a routerLink="/tramites/iniciar" routerLinkActive="active" [title]="'Iniciar Trámite'">
+        <span class="nav-icon">➕</span><span class="nav-label">Iniciar Trámite</span>
+      </a>
+      <a routerLink="/tramites" routerLinkActive="active" [title]="'Mis Trámites'">
+        <span class="nav-icon">📂</span><span class="nav-label">Mis Trámites</span>
+      </a>
     }
   </nav>
 </aside>

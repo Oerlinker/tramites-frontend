@@ -2,6 +2,8 @@ import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
+import { DocumentoService } from '../../core/services/documento.service';
+import { Documento } from '../../shared/models';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -13,8 +15,11 @@ import { environment } from '../../../environments/environment';
 export class MonitorComponent implements OnInit, OnDestroy {
   private api = inject(ApiService);
   protected auth = inject(AuthService);
+  private docService = inject(DocumentoService);
 
   actividades = signal<any[]>([]);
+  docsModal = signal<Documento[]>([]);
+  subiendoDoc = signal(false);
   tramitesAgrupados = signal<Map<string, any[]>>(new Map());
   tramitesExpandidos = new Set<string>();
   actividadSeleccionada = signal<any | null>(null);
@@ -68,6 +73,11 @@ export class MonitorComponent implements OnInit, OnDestroy {
     this.tramiteSeleccionado.set(null);
     this.politicaPasos.set([]);
     this.etiquetasCliente.set({});
+    this.docsModal.set([]);
+    this.docService.getByActividad(actividad.id).subscribe({
+      next: docs => this.docsModal.set(docs),
+      error: () => {},
+    });
 
     this.api.get<any>(`/actividades/${actividad.id}`).subscribe({
       next: detalle => {
@@ -118,6 +128,27 @@ export class MonitorComponent implements OnInit, OnDestroy {
     this.politicaPasos.set([]);
     this.etiquetasCliente.set({});
     this.errorModal.set('');
+    this.docsModal.set([]);
+    this.subiendoDoc.set(false);
+  }
+
+  subirDocModal(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    const a = this.actividadSeleccionada();
+    if (!file || !a) return;
+    this.subiendoDoc.set(true);
+    this.docService.upload(file, undefined, undefined, a.id).subscribe({
+      next: doc => { this.docsModal.update(docs => [...docs, doc]); this.subiendoDoc.set(false); },
+      error: () => this.subiendoDoc.set(false),
+    });
+    (event.target as HTMLInputElement).value = '';
+  }
+
+  eliminarDocModal(docId: string): void {
+    this.docService.eliminar(docId).subscribe({
+      next: () => this.docsModal.update(docs => docs.filter(d => d.id !== docId)),
+      error: () => {},
+    });
   }
 
   getDatosCliente(): { etiqueta: string; valor: any }[] {

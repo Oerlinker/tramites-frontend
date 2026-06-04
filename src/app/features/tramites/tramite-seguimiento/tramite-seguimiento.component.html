@@ -25,7 +25,7 @@
     <table class="table">
       <thead>
         <tr>
-          <th>ID</th><th>Título</th><th>Solicitante</th><th>Estado</th><th>Fecha</th>
+          <th>ID</th><th>Título</th><th>Solicitante</th><th>Estado</th><th>Fecha</th><th>Docs</th>
           @if (auth.getUserRole() !== 'CLIENTE') { <th>Acción</th> }
         </tr>
       </thead>
@@ -37,6 +37,13 @@
             <td>{{ t.usuarioSolicitanteId }}</td>
             <td><span class="badge badge-{{ t.estado.toLowerCase() }}">{{ t.estado }}</span></td>
             <td>{{ t.fechaInicio | slice:0:10 }}</td>
+            <td>
+              <button class="btn-ver-docs"
+                      [class.active]="tramiteDocsAbierto() === t.id"
+                      (click)="toggleDocsTramite(t.id, $event)">
+                📎 {{ tramiteDocsAbierto() === t.id ? '▲ Cerrar' : 'Ver documentos' }}
+              </button>
+            </td>
             @if (auth.getUserRole() !== 'CLIENTE') {
               <td>
                 <select class="select-estado" [value]="t.estado" (change)="cambiarEstado(t.id, $any($event.target).value)">
@@ -53,6 +60,29 @@
               </td>
             }
           </tr>
+          @if (tramiteDocsAbierto() === t.id) {
+            <tr class="docs-expansion-row">
+              <td [attr.colspan]="auth.getUserRole() !== 'CLIENTE' ? 7 : 6">
+                <div class="docs-expansion-panel">
+                  @if (cargandoDocsTramite()) {
+                    <span class="docs-cargando">Cargando documentos...</span>
+                  } @else if (docsDelTramite().length === 0) {
+                    <span class="docs-sin">Sin documentos adjuntos en este trámite.</span>
+                  } @else {
+                    <span class="docs-count">{{ docsDelTramite().length }} documento(s) adjunto(s)</span>
+                    <div class="docs-lista">
+                      @for (doc of docsDelTramite(); track doc.id) {
+                        <div class="doc-fila">
+                          <span class="doc-nombre">📄 {{ doc.nombre }}</span>
+                          <a [href]="doc.url" target="_blank" class="btn-doc-dl-seg">⬇ Descargar</a>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
         }
       </tbody>
     </table>
