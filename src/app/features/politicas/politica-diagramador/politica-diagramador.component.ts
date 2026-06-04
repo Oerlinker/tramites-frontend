@@ -1249,10 +1249,15 @@ INSTRUCCIONES:
   cargarDocsActividad(id: string): void {
     this.cargandoDocs.set(true);
     this.docsActividad.set([]);
-    this.docService.getByActividad(id).subscribe({
-      next: docs => { this.docsActividad.set(docs); this.cargandoDocs.set(false); },
-      error: () => this.cargandoDocs.set(false),
-    });
+    if (id) {
+      this.docService.getByActividad(id).subscribe({
+        next: docs => { this.docsActividad.set(docs); this.cargandoDocs.set(false); },
+        error: () => { this.docsActividad.set([]); this.cargandoDocs.set(false); }
+      });
+    } else {
+      this.docsActividad.set([]);
+      this.cargandoDocs.set(false);
+    }
   }
 
   subirDocActividad(event: Event): void {
@@ -1260,7 +1265,7 @@ INSTRUCCIONES:
     if (!file || !this.selected) return;
     const id = this.selected.id;
     this.cargandoDocs.set(true);
-    this.docService.upload(file, undefined, undefined, id).subscribe({
+    this.docService.upload(file, this.politicaId ?? undefined, undefined, this.selected?.id ?? undefined).subscribe({
       next: doc => { this.docsActividad.update(docs => [...docs, doc]); this.cargandoDocs.set(false); },
       error: () => this.cargandoDocs.set(false),
     });

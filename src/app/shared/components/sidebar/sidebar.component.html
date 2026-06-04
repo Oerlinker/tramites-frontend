@@ -6,9 +6,11 @@
     <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" [title]="'Dashboard'">
       <span class="nav-icon">⊞</span><span class="nav-label">Dashboard</span>
     </a>
-    <a routerLink="/documentos" routerLinkActive="active" [title]="'Documentos'">
-      <span class="nav-icon">📁</span><span class="nav-label">Documentos</span>
-    </a>
+    @if (auth.getUserRole() === 'ADMIN') {
+      <a routerLink="/documentos" routerLinkActive="active" [title]="'Documentos'">
+        <span class="nav-icon">📁</span><span class="nav-label">Documentos</span>
+      </a>
+    }
     @if (auth.getUserRole() === 'ADMIN') {
       <a routerLink="/politicas" routerLinkActive="active" [title]="'Políticas'">
         <span class="nav-icon">📋</span><span class="nav-label">Políticas</span>

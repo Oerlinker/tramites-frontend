@@ -139,10 +139,8 @@
                     </select>
                   }
                   @if (campo.tipo === 'CHECKBOX') {
-                    <label class="check-label">
-                      <input type="checkbox" [(ngModel)]="datosFormulario[campo.id]" />
-                      {{ campo.etiqueta }}
-                    </label>
+                    <input type="checkbox" [(ngModel)]="datosFormulario[campo.id]"
+                           style="width:18px;height:18px;margin-top:6px;cursor:pointer;" />
                   }
                 }
               </div>

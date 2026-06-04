@@ -28,6 +28,9 @@ export class TramiteSeguimientoComponent implements OnInit {
   tramiteDocsAbierto = signal<string | null>(null);
   docsDelTramite = signal<Documento[]>([]);
   cargandoDocsTramite = signal(false);
+  actividadActiva = signal<any | null>(null);
+  subiendoDocCliente = signal(false);
+  errorSubidaCliente = signal('');
 
   readonly estados = ['PENDIENTE', 'EN_PROCESO', 'COMPLETADO', 'RECHAZADO', 'CANCELADO'];
 
@@ -81,14 +84,53 @@ export class TramiteSeguimientoComponent implements OnInit {
     if (this.tramiteDocsAbierto() === tramiteId) {
       this.tramiteDocsAbierto.set(null);
       this.docsDelTramite.set([]);
+      this.actividadActiva.set(null);
+      this.errorSubidaCliente.set('');
       return;
     }
     this.tramiteDocsAbierto.set(tramiteId);
     this.docsDelTramite.set([]);
+    this.actividadActiva.set(null);
+    this.errorSubidaCliente.set('');
     this.cargandoDocsTramite.set(true);
+
     this.docService.getByTramite(tramiteId).subscribe({
       next: docs => { this.docsDelTramite.set(docs); this.cargandoDocsTramite.set(false); },
       error: () => this.cargandoDocsTramite.set(false),
+    });
+
+    if (this.auth.getUserRole() === 'CLIENTE') {
+      this.api.get<any>(`/tramites/${tramiteId}`).subscribe({
+        next: tramite => {
+          const actividades: any[] = tramite.actividades ?? tramite.pasos ?? [];
+          const activa = actividades.find((a: any) =>
+            (a.estado === 'EN_PROCESO' || a.estado === 'PENDIENTE') &&
+            a.formularioDefinicion?.some((c: any) => c.tipo === 'FILE')
+          ) ?? null;
+          this.actividadActiva.set(activa);
+        },
+        error: () => {}
+      });
+    }
+  }
+
+  subirDocCliente(event: Event, tramiteId: string): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    const activa = this.actividadActiva();
+    this.subiendoDocCliente.set(true);
+    this.errorSubidaCliente.set('');
+    this.docService.upload(file, undefined, tramiteId, activa?.id ?? undefined).subscribe({
+      next: doc => {
+        this.docsDelTramite.update(docs => [...docs, doc]);
+        this.subiendoDocCliente.set(false);
+        input.value = '';
+      },
+      error: () => {
+        this.errorSubidaCliente.set('Error al subir el documento');
+        this.subiendoDocCliente.set(false);
+      }
     });
   }
 }

@@ -79,6 +79,29 @@
                       }
                     </div>
                   }
+                  @if (auth.getUserRole() === 'CLIENTE' && actividadActiva()) {
+                    <div class="cliente-upload-section">
+                      <div class="cliente-upload-header">
+                        <span class="upload-hint">
+                          📋 La actividad <strong>{{ actividadActiva()!.nombre }}</strong>
+                          requiere documentos
+                        </span>
+                      </div>
+                      <label class="btn-subir-cliente">
+                        @if (subiendoDocCliente()) {
+                          ⏳ Subiendo...
+                        } @else {
+                          📎 Adjuntar documento
+                        }
+                        <input type="file" style="display:none"
+                               [disabled]="subiendoDocCliente()"
+                               (change)="subirDocCliente($event, t.id)"/>
+                      </label>
+                      @if (errorSubidaCliente()) {
+                        <span class="upload-error">{{ errorSubidaCliente() }}</span>
+                      }
+                    </div>
+                  }
                 </div>
               </td>
             </tr>

@@ -45,3 +45,9 @@
 .doc-fila { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid #ffe082; border-radius:6px; padding:6px 12px; }
 .doc-nombre { flex:1; font-size:0.85rem; color:#333; }
 .btn-doc-dl-seg { color:#1565c0; text-decoration:none; font-size:0.82rem; white-space:nowrap; }
+
+.cliente-upload-section { margin-top:12px; padding-top:12px; border-top:1px dashed #c5cae9; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.cliente-upload-header { font-size:12px; color:#555; }
+.btn-subir-cliente { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:#1a237e; color:#fff; border-radius:6px; cursor:pointer; font-size:12px; font-weight:500; transition:background 0.15s; }
+.btn-subir-cliente:hover { background:#283593; }
+.upload-error { font-size:11px; color:#c62828; }

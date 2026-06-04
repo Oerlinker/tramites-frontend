@@ -74,10 +74,6 @@ export class MonitorComponent implements OnInit, OnDestroy {
     this.politicaPasos.set([]);
     this.etiquetasCliente.set({});
     this.docsModal.set([]);
-    this.docService.getByActividad(actividad.id).subscribe({
-      next: docs => this.docsModal.set(docs),
-      error: () => {},
-    });
 
     this.api.get<any>(`/actividades/${actividad.id}`).subscribe({
       next: detalle => {
@@ -96,6 +92,28 @@ export class MonitorComponent implements OnInit, OnDestroy {
         this.api.get<any>(`/tramites/${detalle.tramiteId}`).subscribe({
           next: tramite => {
             this.tramiteSeleccionado.set(tramite);
+
+            // Cargar docs propios + docs del diagramador (actividadId corto tipo "n1")
+            this.docService.getByActividad(actividad.id).subscribe({
+              next: docsPropios => {
+                const politicaId = tramite.politicaId ?? null;
+                if (politicaId) {
+                  this.docService.getByPolitica(politicaId).subscribe({
+                    next: docsPolitica => {
+                      const docsNodo = docsPolitica.filter((d: any) =>
+                        d.actividadId && d.actividadId.length < 10
+                      );
+                      this.docsModal.set([...docsPropios, ...docsNodo]);
+                    },
+                    error: () => { this.docsModal.set(docsPropios); }
+                  });
+                } else {
+                  this.docsModal.set(docsPropios);
+                }
+              },
+              error: () => {}
+            });
+
             if (tramite.politicaId) {
               this.api.get<any>(`/politicas/${tramite.politicaId}`).subscribe({
                 next: politica => {
@@ -112,6 +130,9 @@ export class MonitorComponent implements OnInit, OnDestroy {
                 },
                 error: () => { this.loadingDetalle.set(false); this.mostrarModal.set(true); }
               });
+            } else {
+              this.loadingDetalle.set(false);
+              this.mostrarModal.set(true);
             }
           },
           error: () => { this.loadingDetalle.set(false); this.mostrarModal.set(true); }
@@ -137,7 +158,7 @@ export class MonitorComponent implements OnInit, OnDestroy {
     const a = this.actividadSeleccionada();
     if (!file || !a) return;
     this.subiendoDoc.set(true);
-    this.docService.upload(file, undefined, undefined, a.id).subscribe({
+    this.docService.upload(file, undefined, a.tramiteId ?? undefined, a.id).subscribe({
       next: doc => { this.docsModal.update(docs => [...docs, doc]); this.subiendoDoc.set(false); },
       error: () => this.subiendoDoc.set(false),
     });
