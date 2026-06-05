@@ -156,10 +156,12 @@
         <div class="documentos-section">
           <div class="docs-modal-header">
             <h3>📎 Documentos adjuntos</h3>
-            <label class="btn-subir-doc" [class.disabled]="subiendoDoc()">
-              {{ subiendoDoc() ? '⏳ Subiendo...' : '📎 Subir documento' }}
-              <input type="file" hidden (change)="subirDocModal($event)" [disabled]="subiendoDoc()"/>
-            </label>
+            @if (privSvc.puede('subirDocumentos', privilegiosActivos())) {
+              <label class="btn-subir-doc" [class.disabled]="subiendoDoc()">
+                {{ subiendoDoc() ? '⏳ Subiendo...' : '📎 Subir documento' }}
+                <input type="file" hidden (change)="subirDocModal($event)" [disabled]="subiendoDoc()"/>
+              </label>
+            }
           </div>
           @if (docsModal().length === 0 && !subiendoDoc()) {
             <p class="docs-empty">Sin documentos adjuntos</p>
@@ -169,7 +171,9 @@
               <span class="doc-modal-nombre">{{ doc.nombre }}</span>
               <button class="btn-ver-doc" (click)="verDocModal(doc)">👁 Ver</button>
               <a [href]="doc.url" target="_blank" class="btn-doc-descargar">⬇ Descargar</a>
-              <button (click)="eliminarDocModal(doc.id)" class="btn-doc-eliminar" title="Eliminar">×</button>
+              @if (privSvc.puede('eliminarDocumentos', privilegiosActivos())) {
+                <button (click)="eliminarDocModal(doc.id)" class="btn-doc-eliminar" title="Eliminar">×</button>
+              }
             </div>
           }
         </div>

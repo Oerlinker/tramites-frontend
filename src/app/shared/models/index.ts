@@ -59,6 +59,13 @@ export interface PasoWorkflow {
   formulario?: CampoFormulario[];
 }
 
+export interface PrivilegiosPN {
+  verDocumentos: string[];
+  subirDocumentos: string[];
+  eliminarDocumentos: string[];
+  aprobar: string[];
+}
+
 export interface Politica {
   id: string;
   nombre: string;
@@ -69,6 +76,7 @@ export interface Politica {
   fechaCreacion?: string;
   fechaActualizacion?: string;
   diagramJson?: string;
+  privilegios?: PrivilegiosPN;
 }
 
 export interface Tramite {

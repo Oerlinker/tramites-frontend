@@ -6,7 +6,7 @@ import { ColaboracionService } from '../../../core/services/colaboracion.service
 import { NlpService, CampoSugerido } from '../../../core/services/nlp.service';
 import { AudioRecorderComponent } from '../../../shared/components/audio-recorder/audio-recorder.component';
 import { DocumentoService } from '../../../core/services/documento.service';
-import { Politica, Documento } from '../../../shared/models';
+import { Politica, Documento, PrivilegiosPN } from '../../../shared/models';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -88,7 +88,35 @@ const LANE_HEIGHT = 160;
   <div class="diag-desc">
     <input [(ngModel)]="descripcion" placeholder="Descripción..." class="desc-input"/>
     <label><input type="checkbox" [(ngModel)]="activa"/> Activa</label>
+    <button class="btn-privilegios" (click)="mostrarPrivilegios.set(!mostrarPrivilegios())">
+      🔒 Privilegios
+    </button>
   </div>
+  @if (mostrarPrivilegios()) {
+    <div class="privilegios-panel">
+      <div class="priv-header">
+        <span>🔒 Control de Acceso a Documentos</span>
+        <button class="priv-close" (click)="mostrarPrivilegios.set(false)">✕</button>
+      </div>
+      <div class="priv-body">
+        @for (permiso of permisosConfig; track permiso.key) {
+          <div class="priv-row">
+            <span class="priv-label">{{ permiso.label }}</span>
+            <div class="priv-checks">
+              @for (rol of rolesDisponibles; track rol) {
+                <label class="priv-check-label">
+                  <input type="checkbox"
+                         [checked]="tienePrivilegio(permiso.key, rol)"
+                         (change)="togglePrivilegio(permiso.key, rol, $any($event.target).checked)"/>
+                  {{ rol }}
+                </label>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
   @if (error()) { <div class="error-bar">{{ error() }}</div> }
   <div class="diag-toolbar">
     <span>Agregar:</span>
@@ -526,6 +554,18 @@ const LANE_HEIGHT = 160;
 .doc-act-nombre { flex:1; color:#333; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px; }
 .btn-doc-dl { color:#1565c0; text-decoration:none; font-size:13px; }
 .btn-doc-del { background:none; border:none; color:#c62828; font-size:14px; cursor:pointer; padding:0 2px; line-height:1; }
+.btn-privilegios { padding:4px 12px; background:#e8eaf6; color:#1a237e; border:1px solid #c5cae9; border-radius:5px; cursor:pointer; font-size:12px; font-weight:500; white-space:nowrap; }
+.btn-privilegios:hover { background:#c5cae9; }
+.privilegios-panel { background:#fff; border-bottom:2px solid #c5cae9; padding:12px 16px; flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+.priv-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-weight:600; font-size:13px; color:#1a237e; }
+.priv-close { background:none; border:none; font-size:16px; cursor:pointer; color:#666; }
+.priv-close:hover { color:#c62828; }
+.priv-body { display:flex; flex-direction:column; gap:8px; }
+.priv-row { display:flex; align-items:center; gap:12px; padding:6px 10px; background:#f8f9ff; border-radius:6px; border:1px solid #e8eaf6; }
+.priv-label { font-size:12px; font-weight:500; color:#333; min-width:160px; }
+.priv-checks { display:flex; gap:16px; }
+.priv-check-label { display:flex; align-items:center; gap:5px; font-size:12px; color:#555; cursor:pointer; }
+.priv-check-label input { cursor:pointer; }
   `]
 })
 export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -548,6 +588,20 @@ export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDe
   nombre = '';
   descripcion = '';
   activa = true;
+  privilegios: PrivilegiosPN = {
+    verDocumentos: ['ADMIN', 'FUNCIONARIO', 'CLIENTE'],
+    subirDocumentos: ['ADMIN', 'FUNCIONARIO'],
+    eliminarDocumentos: ['ADMIN'],
+    aprobar: ['ADMIN'],
+  };
+  mostrarPrivilegios = signal(false);
+  readonly rolesDisponibles = ['ADMIN', 'FUNCIONARIO', 'CLIENTE'];
+  readonly permisosConfig = [
+    { key: 'verDocumentos',      label: '👁 Ver documentos' },
+    { key: 'subirDocumentos',    label: '📤 Subir documentos' },
+    { key: 'eliminarDocumentos', label: '🗑 Eliminar documentos' },
+    { key: 'aprobar',            label: '✅ Aprobar/Completar' },
+  ];
   loading = signal(false);
   error = signal('');
   departamentos = signal<{id:string, nombre:string}[]>([]);
@@ -630,6 +684,7 @@ export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDe
           this.nombre = p.nombre;
           this.descripcion = p.descripcion || '';
           this.activa = p.activa;
+          if (p.privilegios) { this.privilegios = p.privilegios; }
           if (p.diagramJson) {
             try {
               const data: DiagramData = JSON.parse(p.diagramJson);
@@ -639,6 +694,7 @@ export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDe
               this.nodes = data.nodes || [];
               this.connections = data.connections || [];
               this.nodeCounter = Math.max(...this.nodes.map(n => parseInt(n.id.replace('n','')) || 0), 0);
+              if ((data as any).privilegios) { this.privilegios = (data as any).privilegios; }
               setTimeout(() => this.renderConnections(), 100);
             } catch {
               this.initDefaultDiagram();
@@ -972,7 +1028,7 @@ export class PoliticaDiagramadorComponent implements OnInit, AfterViewInit, OnDe
       descripcion: this.descripcion,
       activa: this.activa,
       pasos,
-      diagramJson: JSON.stringify({ lanes: this.lanes, nodes: this.nodes, connections: this.connections }),
+      diagramJson: JSON.stringify({ lanes: this.lanes, nodes: this.nodes, connections: this.connections, privilegios: this.privilegios }),
     };
     const req = this.isEdit
       ? this.api.put<Politica>(`/politicas/${this.politicaId}`, body)
@@ -1277,6 +1333,17 @@ INSTRUCCIONES:
       next: () => this.docsActividad.update(docs => docs.filter(d => d.id !== docId)),
       error: () => {},
     });
+  }
+
+  tienePrivilegio(key: string, rol: string): boolean {
+    return (this.privilegios as any)[key]?.includes(rol) ?? false;
+  }
+
+  togglePrivilegio(key: string, rol: string, checked: boolean): void {
+    const lista: string[] = [...((this.privilegios as any)[key] ?? [])];
+    if (checked && !lista.includes(rol)) lista.push(rol);
+    else if (!checked) lista.splice(lista.indexOf(rol), 1);
+    this.privilegios = { ...this.privilegios, [key]: lista };
   }
 
   ngOnDestroy() {

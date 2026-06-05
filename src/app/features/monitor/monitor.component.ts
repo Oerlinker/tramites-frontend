@@ -4,6 +4,7 @@ import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DocumentoService } from '../../core/services/documento.service';
+import { PrivilegiosService } from '../../core/services/privilegios.service';
 import { Documento } from '../../shared/models';
 import { environment } from '../../../environments/environment';
 
@@ -18,11 +19,13 @@ export class MonitorComponent implements OnInit, OnDestroy {
   protected auth = inject(AuthService);
   private docService = inject(DocumentoService);
   private sanitizer = inject(DomSanitizer);
+  protected privSvc = inject(PrivilegiosService);
 
   actividades = signal<any[]>([]);
   docsModal = signal<Documento[]>([]);
   subiendoDoc = signal(false);
   docVisorModal = signal<any | null>(null);
+  privilegiosActivos = signal<any>(null);
   tramitesAgrupados = signal<Map<string, any[]>>(new Map());
   tramitesExpandidos = new Set<string>();
   actividadSeleccionada = signal<any | null>(null);
@@ -120,6 +123,8 @@ export class MonitorComponent implements OnInit, OnDestroy {
             if (tramite.politicaId) {
               this.api.get<any>(`/politicas/${tramite.politicaId}`).subscribe({
                 next: politica => {
+                  const diagramData = politica.diagramJson ? JSON.parse(politica.diagramJson) : {};
+                  this.privilegiosActivos.set(diagramData.privilegios ?? null);
                   this.politicaPasos.set(politica.pasos ?? []);
                   const mapa: Record<string, string> = {};
                   (politica.pasos ?? []).forEach((paso: any) => {
@@ -154,6 +159,7 @@ export class MonitorComponent implements OnInit, OnDestroy {
     this.errorModal.set('');
     this.docsModal.set([]);
     this.subiendoDoc.set(false);
+    this.privilegiosActivos.set(null);
   }
 
   subirDocModal(event: Event): void {
