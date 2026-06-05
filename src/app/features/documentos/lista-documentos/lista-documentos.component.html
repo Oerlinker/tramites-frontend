@@ -49,7 +49,8 @@
               <td>{{ doc.fechaSubida | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>{{ doc.subidoPor }}</td>
               <td class="actions">
-                <a [href]="doc.url" target="_blank" rel="noopener" class="btn-sm">Descargar</a>
+                <button class="btn-sm btn-ver" (click)="verDoc(doc)">👁 Ver</button>
+                <a [href]="doc.url" target="_blank" rel="noopener" class="btn-sm">⬇ Descargar</a>
                 <button class="btn-sm btn-danger" (click)="eliminar(doc)">Eliminar</button>
               </td>
             </tr>
@@ -57,5 +58,33 @@
         </tbody>
       </table>
     }
+  }
+
+  @if (docVisor()) {
+    <div class="visor-overlay" (click)="cerrarVisor()">
+      <div class="visor-modal" (click)="$event.stopPropagation()">
+        <div class="visor-header">
+          <span class="visor-nombre">{{ docVisor()!.nombre }}</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <a [href]="docVisor()!.url" target="_blank" class="btn-sm">⬇ Descargar</a>
+            <button class="visor-close" (click)="cerrarVisor()">✕</button>
+          </div>
+        </div>
+        <div class="visor-body">
+          @if (esPDF(docVisor()!)) {
+            <iframe [src]="getSafeUrl(docVisor()!.url)" class="visor-iframe" frameborder="0"></iframe>
+          } @else if (esImagen(docVisor()!)) {
+            <img [src]="docVisor()!.url" class="visor-img" [alt]="docVisor()!.nombre"/>
+          } @else {
+            <div class="visor-no-preview">
+              <span>📄 Vista previa no disponible para este tipo de archivo</span>
+              <a [href]="docVisor()!.url" target="_blank" class="btn-primary" style="margin-top:16px">
+                ⬇ Descargar para ver
+              </a>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
   }
 </div>

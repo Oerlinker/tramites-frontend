@@ -18,3 +18,16 @@
   flex: 1;
   min-width: 200px;
 }
+
+.btn-ver { background:#e8eaf6; color:#1a237e; border:1px solid #c5cae9; }
+.btn-ver:hover { background:#c5cae9; }
+.visor-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; display:flex; align-items:center; justify-content:center; padding:16px; }
+.visor-modal { background:#fff; border-radius:12px; width:90vw; max-width:960px; height:88vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 8px 40px rgba(0,0,0,0.3); }
+.visor-header { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; background:#1a237e; color:#fff; flex-shrink:0; }
+.visor-nombre { font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:60%; }
+.visor-close { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:#fff; width:28px; height:28px; border-radius:50%; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; }
+.visor-close:hover { background:rgba(255,255,255,0.3); }
+.visor-body { flex:1; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#f5f5f5; }
+.visor-iframe { width:100%; height:100%; border:none; }
+.visor-img { max-width:100%; max-height:100%; object-fit:contain; padding:16px; }
+.visor-no-preview { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:#666; font-size:14px; }

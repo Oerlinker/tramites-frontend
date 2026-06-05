@@ -167,6 +167,7 @@
           @for (doc of docsModal(); track doc.id) {
             <div class="doc-modal-item">
               <span class="doc-modal-nombre">{{ doc.nombre }}</span>
+              <button class="btn-ver-doc" (click)="verDocModal(doc)">👁 Ver</button>
               <a [href]="doc.url" target="_blank" class="btn-doc-descargar">⬇ Descargar</a>
               <button (click)="eliminarDocModal(doc.id)" class="btn-doc-eliminar" title="Eliminar">×</button>
             </div>
@@ -191,6 +192,32 @@
           }
         </div>
       }
+    </div>
+  </div>
+}
+
+@if (docVisorModal()) {
+  <div class="visor-overlay-mon" (click)="cerrarVisorModal()">
+    <div class="visor-modal-mon" (click)="$event.stopPropagation()">
+      <div class="visor-header-mon">
+        <span>{{ docVisorModal()!.nombre }}</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <a [href]="docVisorModal()!.url" target="_blank" class="btn-sm-mon">⬇</a>
+          <button (click)="cerrarVisorModal()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:13px;">✕</button>
+        </div>
+      </div>
+      <div class="visor-body-mon">
+        @if (esPDF(docVisorModal()!)) {
+          <iframe [src]="getSafeUrl(docVisorModal()!.url)" style="width:100%;height:100%;border:none;" frameborder="0"></iframe>
+        } @else if (esImagen(docVisorModal()!)) {
+          <img [src]="docVisorModal()!.url" style="max-width:100%;max-height:100%;object-fit:contain;padding:16px;" [alt]="docVisorModal()!.nombre"/>
+        } @else {
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#666;font-size:14px;">
+            <span>📄 Vista previa no disponible</span>
+            <a [href]="docVisorModal()!.url" target="_blank" class="btn-sm-mon">⬇ Descargar</a>
+          </div>
+        }
+      </div>
     </div>
   </div>
 }

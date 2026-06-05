@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DocumentoService } from '../../../core/services/documento.service';
 import { Documento } from '../../../shared/models';
 
@@ -13,10 +14,12 @@ import { Documento } from '../../../shared/models';
 })
 export class ListaDocumentosComponent implements OnInit {
   private docService = inject(DocumentoService);
+  private sanitizer = inject(DomSanitizer);
 
   documentos = signal<Documento[]>([]);
   loading = signal(false);
   error = signal('');
+  docVisor = signal<Documento | null>(null);
 
   tipoContexto: 'politica' | 'tramite' | 'actividad' = 'politica';
   contextoId = '';
@@ -51,6 +54,13 @@ export class ListaDocumentosComponent implements OnInit {
       },
     });
   }
+
+  getSafeUrl(url: string): SafeResourceUrl { return this.sanitizer.bypassSecurityTrustResourceUrl(url); }
+
+  verDoc(doc: Documento) { this.docVisor.set(doc); }
+  cerrarVisor() { this.docVisor.set(null); }
+  esPDF(doc: Documento) { return doc.tipo?.includes('pdf') || doc.nombre?.endsWith('.pdf'); }
+  esImagen(doc: Documento) { return doc.tipo?.startsWith('image/') || /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(doc.nombre); }
 
   eliminar(doc: Documento) {
     if (!confirm(`¿Eliminar "${doc.nombre}"?`)) return;

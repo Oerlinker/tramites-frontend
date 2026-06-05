@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DocumentoService } from '../../core/services/documento.service';
 import { Documento } from '../../shared/models';
 import { environment } from '../../../environments/environment';
@@ -16,10 +17,12 @@ export class MonitorComponent implements OnInit, OnDestroy {
   private api = inject(ApiService);
   protected auth = inject(AuthService);
   private docService = inject(DocumentoService);
+  private sanitizer = inject(DomSanitizer);
 
   actividades = signal<any[]>([]);
   docsModal = signal<Documento[]>([]);
   subiendoDoc = signal(false);
+  docVisorModal = signal<any | null>(null);
   tramitesAgrupados = signal<Map<string, any[]>>(new Map());
   tramitesExpandidos = new Set<string>();
   actividadSeleccionada = signal<any | null>(null);
@@ -164,6 +167,13 @@ export class MonitorComponent implements OnInit, OnDestroy {
     });
     (event.target as HTMLInputElement).value = '';
   }
+
+  getSafeUrl(url: string): SafeResourceUrl { return this.sanitizer.bypassSecurityTrustResourceUrl(url); }
+
+  verDocModal(doc: any) { this.docVisorModal.set(doc); }
+  cerrarVisorModal() { this.docVisorModal.set(null); }
+  esPDF(doc: any) { return doc.tipo?.includes('pdf') || doc.nombre?.endsWith('.pdf'); }
+  esImagen(doc: any) { return doc.tipo?.startsWith('image/') || /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(doc.nombre); }
 
   eliminarDocModal(docId: string): void {
     this.docService.eliminar(docId).subscribe({
