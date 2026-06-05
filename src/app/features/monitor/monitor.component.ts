@@ -39,6 +39,8 @@ export class MonitorComponent implements OnInit, OnDestroy {
   mostrarModal = signal(false);
   etiquetasCliente = signal<Record<string, string>>({});
   datosFormulario: Record<string, any> = {};
+  guardandoBorrador = signal(false);
+  borradorGuardado = signal(false);
 
   private ws: WebSocket | null = null;
   private _refreshInterval: any;
@@ -91,6 +93,22 @@ export class MonitorComponent implements OnInit, OnDestroy {
           this.datosFormulario[c.id] = detalle.datosFormulario?.[c.id]
             ?? (c.tipo === 'CHECKBOX' ? false : '');
         });
+
+        if (!yaCompletada) {
+          const borradorRaw = localStorage.getItem(`borrador_actividad_${detalle.id}`);
+          if (borradorRaw) {
+            try {
+              const borrador = JSON.parse(borradorRaw);
+              Object.keys(borrador.datos ?? {}).forEach(k => {
+                if (borrador.datos[k] !== '' && borrador.datos[k] !== null) {
+                  this.datosFormulario[k] = borrador.datos[k];
+                }
+              });
+              this.borradorGuardado.set(true);
+              setTimeout(() => this.borradorGuardado.set(false), 2500);
+            } catch {}
+          }
+        }
 
         detalle._soloLectura = yaCompletada;
         this.actividadSeleccionada.set(detalle);
@@ -160,6 +178,7 @@ export class MonitorComponent implements OnInit, OnDestroy {
     this.docsModal.set([]);
     this.subiendoDoc.set(false);
     this.privilegiosActivos.set(null);
+    this.borradorGuardado.set(false);
   }
 
   subirDocModal(event: Event): void {
@@ -229,7 +248,11 @@ export class MonitorComponent implements OnInit, OnDestroy {
     }
     this.errorModal.set('');
     this.api.patch<any>(`/actividades/${a.id}/formulario`, this.datosFormulario).subscribe({
-      next: () => { this.cerrarModal(); this.load(); },
+      next: () => {
+        this.eliminarBorrador(a.id);
+        this.cerrarModal();
+        this.load();
+      },
       error: () => this.errorModal.set('Error al completar actividad')
     });
   }
@@ -287,6 +310,30 @@ export class MonitorComponent implements OnInit, OnDestroy {
       case 'OMITIDO':    return 'badge-omitido';
       default:           return 'badge-default';
     }
+  }
+
+  guardarBorrador(): void {
+    const a = this.actividadSeleccionada();
+    if (!a || a._soloLectura) return;
+    this.guardandoBorrador.set(true);
+    const key = `borrador_actividad_${a.id}`;
+    localStorage.setItem(key, JSON.stringify({
+      datos: this.datosFormulario,
+      fecha: new Date().toISOString()
+    }));
+    setTimeout(() => {
+      this.guardandoBorrador.set(false);
+      this.borradorGuardado.set(true);
+      setTimeout(() => this.borradorGuardado.set(false), 2500);
+    }, 400);
+  }
+
+  eliminarBorrador(id: string): void {
+    localStorage.removeItem(`borrador_actividad_${id}`);
+  }
+
+  tieneBorrador(id: string): boolean {
+    return !!localStorage.getItem(`borrador_actividad_${id}`);
   }
 
   private conectarWS() {

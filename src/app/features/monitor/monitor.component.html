@@ -72,7 +72,12 @@
     <div class="modal-atender" (click)="$event.stopPropagation()">
       @if (actividadSeleccionada(); as a) {
         <div class="modal-header">
-          <h2>{{ a.nombre }}</h2>
+          <h2>
+            {{ a.nombre }}
+            @if (tieneBorrador(a.id)) {
+              <span class="badge-borrador">💾 Borrador guardado</span>
+            }
+          </h2>
           <button class="btn-close" (click)="cerrarModal()">✕</button>
         </div>
 
@@ -189,6 +194,13 @@
               <button class="btn-iniciar" (click)="iniciarActividad()">▶ Iniciar</button>
             }
             @if (a.estado === 'EN_PROCESO' || a.estado === 'PENDIENTE') {
+              <button class="btn-borrador"
+                      [disabled]="guardandoBorrador()"
+                      (click)="guardarBorrador()">
+                @if (guardandoBorrador()) { ⏳ Guardando... }
+                @else if (borradorGuardado()) { ✅ Borrador guardado }
+                @else { 💾 Guardar borrador }
+              </button>
               <button class="btn-completar" (click)="completarActividad()">✓ Completar</button>
             }
           } @else {
