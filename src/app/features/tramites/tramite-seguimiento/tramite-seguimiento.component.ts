@@ -5,6 +5,8 @@ import { SlicePipe } from '@angular/common';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DocumentoService } from '../../../core/services/documento.service';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { Tramite, Documento } from '../../../shared/models';
 
 @Component({
@@ -31,6 +33,8 @@ export class TramiteSeguimientoComponent implements OnInit {
   actividadActiva = signal<any | null>(null);
   subiendoDocCliente = signal(false);
   errorSubidaCliente = signal('');
+  generandoReporte = signal<string | null>(null);
+  errorReporte = signal('');
 
   readonly estados = ['PENDIENTE', 'EN_PROCESO', 'COMPLETADO', 'RECHAZADO', 'CANCELADO'];
 
@@ -112,6 +116,89 @@ export class TramiteSeguimientoComponent implements OnInit {
         error: () => {}
       });
     }
+  }
+
+  generarReporte(t: Tramite, event: Event): void {
+    event.stopPropagation();
+    this.generandoReporte.set(t.id);
+    this.errorReporte.set('');
+
+    this.api.get<any>(`/tramites/${t.id}`).subscribe({
+      next: tramiteDetalle => {
+        const politicaId: string | null = tramiteDetalle.politicaId ?? null;
+        const actividadesIds: string[] = tramiteDetalle.actividadesIds ?? [];
+
+        const politica$ = politicaId
+          ? this.api.get<any>(`/politicas/${politicaId}`)
+          : of(null);
+
+        const actividades$ = actividadesIds.length > 0
+          ? forkJoin(actividadesIds.map((id: string) => this.api.get<any>(`/actividades/${id}`)))
+          : of([]);
+
+        const solicitante$ = this.api.get<any>(`/usuarios/${tramiteDetalle.usuarioSolicitanteId}`)
+          .pipe(catchError(() => of(null)));
+
+        forkJoin({ politica: politica$, actividades: actividades$, solicitante: solicitante$ }).subscribe({
+          next: ({ politica, actividades, solicitante }: any) => {
+            const actividadesMapeadas = (actividades ?? []).map((a: any) => ({
+              nombre: a.nombre ?? 'Actividad',
+              estado: a.estado ?? 'PENDIENTE',
+              departamento: a.nombreDepartamento ?? a.departamento ?? null,
+              responsable: a.responsableId ?? null,
+              datosFormulario: a.datosFormulario ?? null,
+            }));
+
+            const payload = {
+              tramiteId: t.id,
+              titulo: t.titulo ?? 'Sin título',
+              estado: t.estado,
+              solicitante: solicitante?.username ?? solicitante?.nombre ?? t.usuarioSolicitanteId,
+              fechaInicio: t.fechaInicio,
+              fechaFin: (t as any).fechaFin ?? null,
+              actividades: actividadesMapeadas,
+              politicaNombre: politica?.nombre ?? null,
+            };
+
+            this.api.generarReporte(payload).subscribe({
+              next: (res: any) => {
+                if (res.pdf) {
+                  const bytes = Uint8Array.from(atob(res.pdf), c => c.charCodeAt(0));
+                  const blob = new Blob([bytes], { type: 'application/pdf' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `reporte-${t.id.slice(-6)}.pdf`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }
+                if (res.audio) {
+                  const audioBytes = Uint8Array.from(atob(res.audio), c => c.charCodeAt(0));
+                  const audioBlob = new Blob([audioBytes], { type: 'audio/mpeg' });
+                  const audioUrl = URL.createObjectURL(audioBlob);
+                  const audio = new Audio(audioUrl);
+                  audio.play();
+                  audio.onended = () => URL.revokeObjectURL(audioUrl);
+                }
+                this.generandoReporte.set(null);
+              },
+              error: () => {
+                this.errorReporte.set('Error al generar reporte');
+                this.generandoReporte.set(null);
+              }
+            });
+          },
+          error: () => {
+            this.errorReporte.set('Error al cargar datos');
+            this.generandoReporte.set(null);
+          }
+        });
+      },
+      error: () => {
+        this.errorReporte.set('Error al cargar trámite');
+        this.generandoReporte.set(null);
+      }
+    });
   }
 
   subirDocCliente(event: Event, tramiteId: string): void {

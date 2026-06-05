@@ -26,6 +26,7 @@
       <thead>
         <tr>
           <th>ID</th><th>Título</th><th>Solicitante</th><th>Estado</th><th>Fecha</th><th>Docs</th>
+          @if (auth.getUserRole() !== 'CLIENTE') { <th>Reporte</th> }
           @if (auth.getUserRole() !== 'CLIENTE') { <th>Acción</th> }
         </tr>
       </thead>
@@ -44,6 +45,19 @@
                 📎 {{ tramiteDocsAbierto() === t.id ? '▲ Cerrar' : 'Ver documentos' }}
               </button>
             </td>
+            @if (auth.getUserRole() !== 'CLIENTE') {
+              <td>
+                <button class="btn-reporte"
+                        [disabled]="generandoReporte() === t.id"
+                        (click)="generarReporte(t, $event)">
+                  @if (generandoReporte() === t.id) {
+                    ⏳
+                  } @else {
+                    📊 Reporte
+                  }
+                </button>
+              </td>
+            }
             @if (auth.getUserRole() !== 'CLIENTE') {
               <td>
                 <select class="select-estado" [value]="t.estado" (change)="cambiarEstado(t.id, $any($event.target).value)">
@@ -109,6 +123,9 @@
         }
       </tbody>
     </table>
+    @if (errorReporte()) {
+      <p class="error-msg">{{ errorReporte() }}</p>
+    }
     <div class="pagination">
       <button (click)="prevPage()" [disabled]="currentPage() === 0">‹ Anterior</button>
       <span>Página {{ currentPage() + 1 }} / {{ totalPages() }}</span>

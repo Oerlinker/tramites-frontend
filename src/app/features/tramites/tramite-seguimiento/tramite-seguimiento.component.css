@@ -51,3 +51,7 @@
 .btn-subir-cliente { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:#1a237e; color:#fff; border-radius:6px; cursor:pointer; font-size:12px; font-weight:500; transition:background 0.15s; }
 .btn-subir-cliente:hover { background:#283593; }
 .upload-error { font-size:11px; color:#c62828; }
+
+.btn-reporte { padding:4px 10px; font-size:11px; background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; border-radius:4px; cursor:pointer; white-space:nowrap; }
+.btn-reporte:hover:not(:disabled) { background:#c8e6c9; }
+.btn-reporte:disabled { opacity:0.6; cursor:default; }

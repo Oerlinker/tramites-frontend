@@ -39,4 +39,8 @@ export class ApiService {
   consultarIA(texto: string, contexto?: string): Observable<any> {
     return this.http.post(`${environment.iaUrl}/api/ia/consulta`, { texto, contexto });
   }
+
+  generarReporte(datos: any): Observable<any> {
+    return this.http.post(`${environment.iaUrl}/api/ia/generar-reporte`, datos);
+  }
 }
