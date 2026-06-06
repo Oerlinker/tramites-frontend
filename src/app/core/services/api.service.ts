@@ -43,4 +43,16 @@ export class ApiService {
   generarReporte(datos: any): Observable<any> {
     return this.http.post(`${environment.iaUrl}/api/ia/generar-reporte`, datos);
   }
+
+  predecirTiempoTF(body: { orden: number; num_campos: number; hora: number; dia: number }) {
+    return this.http.post<any>(`${environment.iaUrl}/api/ia/tensorflow/predecir-tiempo`, body);
+  }
+
+  detectarAnomaliaTF(body: { tiempo_actual: number; tiempo_esperado: number }) {
+    return this.http.post<any>(`${environment.iaUrl}/api/ia/tensorflow/detectar-anomalia`, body);
+  }
+
+  predecirExitoTF(body: { orden_actual: number; total_actividades: number; completadas: number }) {
+    return this.http.post<any>(`${environment.iaUrl}/api/ia/tensorflow/predecir-exito`, body);
+  }
 }

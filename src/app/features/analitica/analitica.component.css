@@ -41,3 +41,17 @@
 
 /* Cuello de botella badge */
 .badge-top { font-size:0.65rem; background:#fff3e0; color:#e65100; border:1px solid #ffcc80; border-radius:4px; padding:1px 5px; font-weight:600; }
+.tf-section { margin-top: 1.5rem; }
+.tf-loading { color: #6b7280; font-size: 14px; }
+.tf-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem; }
+.tf-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.4rem; }
+.tf-icon { font-size: 2rem; }
+.tf-label { font-size: 13px; color: #6b7280; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+.tf-value { font-size: 1.75rem; font-weight: 700; color: #1e293b; }
+.tf-value small { font-size: 1rem; font-weight: 400; color: #6b7280; margin-left: 2px; }
+.tf-sub { font-size: 12px; color: #94a3b8; max-width: 200px; line-height: 1.4; }
+.tf-na { font-size: 1rem; color: #94a3b8; }
+.tf-tiempo { border-top: 3px solid #3b82f6; }
+.tf-anomalia-alerta { border-top: 3px solid #ef4444; background: #fff5f5; }
+.tf-anomalia-ok { border-top: 3px solid #22c55e; }
+.tf-exito { border-top: 3px solid #8b5cf6; }

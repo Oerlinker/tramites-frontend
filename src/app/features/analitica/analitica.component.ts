@@ -1,6 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { ApiService } from '../../core/services/api.service';
+import { forkJoin } from 'rxjs';
+import { catchError, of } from 'rxjs';
 
 interface Analitica {
   totalTramites: number;
@@ -11,6 +13,10 @@ interface Analitica {
   duracionPromedioHoras: number;
   tramitesUltimos7Dias: number;
 }
+
+interface TFTiempo { tiempo_estimado_horas: number; }
+interface TFAnomalia { es_anomalia: boolean; score: number; mensaje: string; }
+interface TFExito { probabilidad: number; recomendacion: string; }
 
 @Component({
   selector: 'app-analitica',
@@ -25,6 +31,10 @@ export class AnaliticaComponent implements OnInit {
   loading = signal(true);
   error = signal('');
   data = signal<Analitica | null>(null);
+  tfTiempo = signal<TFTiempo | null>(null);
+  tfAnomalia = signal<TFAnomalia | null>(null);
+  tfExito = signal<TFExito | null>(null);
+  loadingTF = signal(true);
 
   readonly estadoColores: Record<string, string> = {
     PENDIENTE:   '#f59e0b',
@@ -45,6 +55,17 @@ export class AnaliticaComponent implements OnInit {
         this.error.set('Error al cargar analítica. Verifica que tienes permisos de administrador.');
         this.loading.set(false);
       }
+    });
+
+    forkJoin({
+      tiempo: this.api.predecirTiempoTF({ orden: 2, num_campos: 3, hora: new Date().getHours(), dia: new Date().getDay() }).pipe(catchError(() => of(null))),
+      anomalia: this.api.detectarAnomaliaTF({ tiempo_actual: this.data()?.duracionPromedioHoras ?? 4, tiempo_esperado: 4 }).pipe(catchError(() => of(null))),
+      exito: this.api.predecirExitoTF({ orden_actual: 2, total_actividades: 4, completadas: this.data()?.totalActividades ?? 0 }).pipe(catchError(() => of(null)))
+    }).subscribe(results => {
+      if (results.tiempo) this.tfTiempo.set(results.tiempo as TFTiempo);
+      if (results.anomalia) this.tfAnomalia.set(results.anomalia as TFAnomalia);
+      if (results.exito) this.tfExito.set(results.exito as TFExito);
+      this.loadingTF.set(false);
     });
   }
 

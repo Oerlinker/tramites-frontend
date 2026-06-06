@@ -95,5 +95,49 @@
       </div>
     </div>
 
+    <!-- FILA 4: Motor TensorFlow -->
+    <div class="chart-card chart-wide tf-section">
+      <h2>🤖 Motor TensorFlow — Predicciones IA</h2>
+      @if (loadingTF()) {
+        <p class="tf-loading">Calculando predicciones...</p>
+      } @else {
+        <div class="tf-cards">
+          <!-- Tiempo estimado -->
+          <div class="tf-card tf-tiempo">
+            <div class="tf-icon">⏱️</div>
+            <div class="tf-label">Tiempo estimado</div>
+            @if (tfTiempo(); as t) {
+              <div class="tf-value">{{ t.tiempo_estimado_horas | number:'1.1-1' }} <small>horas</small></div>
+              <div class="tf-sub">por actividad promedio</div>
+            } @else {
+              <div class="tf-value tf-na">N/D</div>
+            }
+          </div>
+          <!-- Anomalía -->
+          <div class="tf-card" [class.tf-anomalia-alerta]="tfAnomalia()?.es_anomalia" [class.tf-anomalia-ok]="!tfAnomalia()?.es_anomalia">
+            <div class="tf-icon">{{ tfAnomalia()?.es_anomalia ? '🚨' : '✅' }}</div>
+            <div class="tf-label">Detección de anomalías</div>
+            @if (tfAnomalia(); as a) {
+              <div class="tf-value">{{ a.es_anomalia ? 'Anomalía detectada' : 'Sin anomalías' }}</div>
+              <div class="tf-sub">Score: {{ a.score | number:'1.1-1' }} — {{ a.mensaje }}</div>
+            } @else {
+              <div class="tf-value tf-na">N/D</div>
+            }
+          </div>
+          <!-- Probabilidad de éxito -->
+          <div class="tf-card tf-exito">
+            <div class="tf-icon">🎯</div>
+            <div class="tf-label">Probabilidad de éxito</div>
+            @if (tfExito(); as e) {
+              <div class="tf-value">{{ (e.probabilidad * 100) | number:'1.0-0' }}<small>%</small></div>
+              <div class="tf-sub">{{ e.recomendacion }}</div>
+            } @else {
+              <div class="tf-value tf-na">N/D</div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
   }
 </div>
