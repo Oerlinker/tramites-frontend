@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
+import { DatePipe } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DocumentoService } from '../../core/services/documento.service';
 import { PrivilegiosService } from '../../core/services/privilegios.service';
@@ -10,7 +11,7 @@ import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-monitor',
-  imports: [FormsModule],
+  imports: [FormsModule, DatePipe],
   templateUrl: './monitor.component.html',
   styleUrl: './monitor.component.css'
 })
@@ -41,6 +42,7 @@ export class MonitorComponent implements OnInit, OnDestroy {
   datosFormulario: Record<string, any> = {};
   guardandoBorrador = signal(false);
   borradorGuardado = signal(false);
+  historialActividad = signal<any[]>([]);
 
   private ws: WebSocket | null = null;
   private _refreshInterval: any;
@@ -113,6 +115,12 @@ export class MonitorComponent implements OnInit, OnDestroy {
         detalle._soloLectura = yaCompletada;
         this.actividadSeleccionada.set(detalle);
 
+        // Cargar historial
+        this.api.get<any[]>(`/actividades/${detalle.id}/historial`).subscribe({
+          next: h => this.historialActividad.set(h ?? []),
+          error: () => this.historialActividad.set([])
+        });
+
         this.api.get<any>(`/tramites/${detalle.tramiteId}`).subscribe({
           next: tramite => {
             this.tramiteSeleccionado.set(tramite);
@@ -179,6 +187,7 @@ export class MonitorComponent implements OnInit, OnDestroy {
     this.subiendoDoc.set(false);
     this.privilegiosActivos.set(null);
     this.borradorGuardado.set(false);
+    this.historialActividad.set([]);
   }
 
   subirDocModal(event: Event): void {
@@ -334,6 +343,17 @@ export class MonitorComponent implements OnInit, OnDestroy {
 
   tieneBorrador(id: string): boolean {
     return !!localStorage.getItem(`borrador_actividad_${id}`);
+  }
+
+  iconoHistorial(tipo: string): string {
+    const iconos: Record<string, string> = {
+      'INICIADA': '▶️',
+      'COMPLETADA': '✅',
+      'FORMULARIO_GUARDADO': '💾',
+      'DOCUMENTO_SUBIDO': '📎',
+      'BORRADOR': '✏️',
+    };
+    return iconos[tipo] ?? '📋';
   }
 
   private conectarWS() {

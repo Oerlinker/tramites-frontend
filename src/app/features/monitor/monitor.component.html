@@ -183,6 +183,26 @@
           }
         </div>
 
+        @if (historialActividad().length > 0) {
+          <div class="historial-section">
+            <div class="historial-titulo">📋 Historial de cambios</div>
+            <div class="historial-lista">
+              @for (entrada of historialActividad(); track $index) {
+                <div class="historial-entrada">
+                  <span class="hist-icono">{{ iconoHistorial(entrada.tipo) }}</span>
+                  <div class="hist-info">
+                    <span class="hist-desc">{{ entrada.descripcion }}</span>
+                    <span class="hist-meta">
+                      {{ entrada.autorNombre }} ·
+                      {{ entrada.fecha | date:'dd/MM/yyyy HH:mm' }}
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
         @if (errorModal()) {
           <div class="alert-error">{{ errorModal() }}</div>
         }
